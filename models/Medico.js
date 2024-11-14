@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configdb');
+//const Especialidad = require('./Especialidad'); // Importa el modelo Especialidad para definir la relación
 
 const Medico = sequelize.define('Medico', {
     id_medico: {
@@ -45,5 +46,8 @@ const Medico = sequelize.define('Medico', {
     createdAt: 'fecha_alta',
     updatedAt: false
 });
+
+// Define la relación muchos a muchos con Especialidad a través de MedicoEspecialidad
+//Medico.belongsToMany(Especialidad, { through: 'MedicoEspecialidad', foreignKey: 'id_medico' });
 
 module.exports = Medico;

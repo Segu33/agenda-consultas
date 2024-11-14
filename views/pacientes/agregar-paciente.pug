@@ -1,0 +1,40 @@
+//- views/pacientes/agregar-paciente.pug
+doctype html
+html(lang="es")
+  head
+
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Agregar Paciente
+    
+
+  body
+    h1 Agregar Nuevo Paciente
+
+    form(action="/pacientes" method="POST")
+      //- Campo de nombre
+      label(for="nombre") Nombre
+      input(type="text" name="nombre" id="nombre" required maxlength="100")
+      
+      //- Campo de apellido
+      label(for="apellido") Apellido
+      input(type="text" name="apellido" id="apellido" required maxlength="100")
+
+      //- Campo de DNI
+      label(for="dni") DNI
+      input(type="text" name="dni" id="dni" required maxlength="10")
+
+      //- Campo de email
+      label(for="email") Email
+      input(type="email" name="email" id="email" required maxlength="100")
+
+      //- Campo de teléfono
+      label(for="telefono") Teléfono
+      input(type="text" name="telefono" id="telefono" maxlength="20")
+
+      //- Campo de obra social
+      label(for="obra_social") Obra Social
+      input(type="text" name="obra_social" id="obra_social" maxlength="100")
+
+      //- Botón de envío
+      button(type="submit") Agregar Paciente

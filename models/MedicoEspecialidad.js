@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configdb');
-
 const Medico = require('./Medico');
 const Especialidad = require('./Especialidad');
 
@@ -29,6 +28,7 @@ const MedicoEspecialidad = sequelize.define('MedicoEspecialidad', {
     timestamps: false
 });
 
+// Relaciona Medico y Especialidad a través de MedicoEspecialidad
 Medico.belongsToMany(Especialidad, { through: MedicoEspecialidad, foreignKey: 'id_medico' });
 Especialidad.belongsToMany(Medico, { through: MedicoEspecialidad, foreignKey: 'id_especialidad' });
 
