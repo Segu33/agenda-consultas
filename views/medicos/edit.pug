@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+  h1 Editar Médico
+
+  form(action=`/medicos/update/${medico.id_medico}`, method="post")
+    label Nombre:
+    input(type="text" name="nombre" value=medico.nombre)
+
+    label Apellido:
+    input(type="text" name="apellido" value=medico.apellido)
+
+    label DNI:
+    input(type="text" name="dni" value=medico.dni)
+
+    label Email:
+    input(type="text" name="email" value=medico.email)
+
+    label Teléfono:
+    input(type="text" name="telefono" value=medico.telefono)
+
+    label Estado:
+    select(name="estado")
+      option(value=true, selected=medico.estado === true) Activo
+      option(value=false, selected=medico.estado === false) Inactivo
+
+    button(type="submit") Guardar cambios
+
+  //- Formulario para asignar especialidades
+  h2 Asignar Especialidad
+  form(action=`/medicos/${medico.id_medico}/asignar-especialidad`, method="post")
+    select(name="especialidadId")
+      each especialidad in especialidades
+        option(value=especialidad.id_especialidad) #{especialidad.nombre}
+    button(type="submit") Asignar Especialidad
+
+  //- Lista de especialidades asignadas con opción para eliminar
+  h2 Especialidades Asignadas
+  ul
+    each especialidad in medico.Especialidads
+      li
+        span #{especialidad.nombre}
+        form(action=`/medicos/${medico.id_medico}/eliminar-especialidad`, method="post", style="display:inline")
+          input(type="hidden" name="especialidadId" value=especialidad.id_especialidad)
+          button(type="submit") Eliminar

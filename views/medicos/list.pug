@@ -1,0 +1,26 @@
+extends ../layout
+
+block content
+  h1 Lista de Médicos
+  a(href='/medicos/add') Agregar Médico
+  table
+    thead
+      tr
+        th Nombre
+        th Apellido
+        th DNI
+        th Email
+        th Estado
+        th Acciones
+    tbody
+      each medico in medicos
+        tr
+          td= medico.nombre
+          td= medico.apellido
+          td= medico.dni
+          td= medico.email
+          td= medico.estado ? 'Activo' : 'Inactivo'
+          td
+            a(href=`/medicos/edit/${medico.id_medico}`) Editar
+            form(action=`/medicos/delete/${medico.id_medico}`, method="POST")
+              button(type="submit") Eliminar
