@@ -2,22 +2,94 @@ doctype html
 html(lang="es")
   head
     meta(charset="UTF-8")
-    meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    title= title
-    link(rel="stylesheet", href="/styles.css")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title= title || "Agenda Médica"
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap", rel="stylesheet")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
 
+    //- Estilos embebidos
+    style.
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background-color: #eaf6fb;
+        color: #1e3a5f;
+      }
+
+      header {
+        background-color: #1e3a5f;
+        padding: 16px 24px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      nav {
+        margin-top: 10px;
+      }
+
+      nav a {
+        color: white;
+        margin-right: 16px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+      }
+
+      nav a:hover {
+        text-decoration: underline;
+      }
+
+      main {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 24px;
+        min-height: 80vh;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 32px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 960px;
+      }
+
+      footer {
+        background-color: #1e3a5f;
+        color: white;
+        text-align: center;
+        padding: 14px 20px;
+        font-size: 14px;
+      }
 
   body
     header
-      h1 Agenda Médica
+      h1 Agenda De Consultorios
       nav
         a(href="/") Inicio
         a(href="/medicos") Médicos
         a(href="/pacientes") Pacientes
         a(href="/turnos") Turnos
 
-    //- Aquí va el contenido que se cambia según la vista
-    block content
+    main
+      block content
 
     footer
-      p © 2024 Todos los derechos reservados.
+      p © Luis Segura 2025 Todos los derechos reservados.
+

@@ -15,7 +15,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 // Rutas de cada módulo
 const medicoRoutes = require('./routes/medicoRoutes');
 const pacienteRoutes = require('./routes/pacienteRoutes');
@@ -54,11 +53,5 @@ app.use('/turnos', turnoRoutes);
 app.use('/sobreturnos', sobreturnoRoutes);
 app.use('/agenda-cerrada', agendaCerradaRoutes);
 
-
-// Escuchar en el puerto 3000 o el definido en .env
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor escuchando en http://localhost:${PORT}`);
-});
 
 module.exports = app;

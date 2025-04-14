@@ -1,5 +1,6 @@
 // turnoController.js
 const Turno = require('../models/Turno');
+const Paciente = require('../models/Paciente'); // Asegurate que exista el modelo
 
 exports.getAll = async (req, res) => {
     try {
@@ -64,3 +65,38 @@ exports.getAvailable = async (req, res) => {
         res.status(500).json({ error: 'Error al obtener turnos disponibles' });
     }
 };
+exports.confirmarTurno = async (req, res) => {
+    const { horarioId, dni, nombre, telefono, sobreturno } = req.body;
+  
+    try {
+      // Buscar paciente por DNI
+      let paciente = await Paciente.findOne({ where: { dni } });
+  
+      if (!paciente) {
+        const [nombreCompleto, ...resto] = nombre.trim().split(' ');
+        const apellido = resto.join(' ') || '---'; // Por si solo ponen un nombre
+  
+        paciente = await Paciente.create({
+          nombre: nombreCompleto,
+          apellido,
+          dni,
+          telefono,
+          email: `${dni}@temporal.com` // Podés generar un email temporal si no se carga desde el form
+        });
+      }
+  
+      // Crear el turno
+      await Turno.create({
+        paciente_id: paciente.id_paciente,
+        horario_id: horarioId, // Asegurate que exista en tu modelo de Turno
+        sobreturno: sobreturno === 'on',
+        estado: sobreturno === 'on' ? 'sobreturno' : 'reservado'
+      });
+  
+      res.redirect('/programacion?success=1');
+    } catch (error) {
+      console.error('Error al confirmar turno:', error);
+      res.redirect('/programacion?error=1');
+    }
+  };
+  

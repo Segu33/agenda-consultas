@@ -13,3 +13,5 @@ router.delete('/:id', turnoController.delete);
 router.get('/disponibles', turnoController.getAvailable);
 
 module.exports = router;
+// Ruta para confirmar turno desde programación rápida
+router.post('/confirmar', turnoController.confirmarTurno);
