@@ -2,25 +2,27 @@ extends layout
 
 block content
   .container
-    h2 Crear Sobreturno
+    h2 Registrar Sobreturno
 
-    if error
-      p.text-red-500= error
+    form(method="POST", action="/turnos/sobreturno")
+      .form-group
+        label(for="fecha") Fecha:
+        input(type="date", name="fecha", required)
 
-    form(method="POST", action="/sobreturno/crear")
-      input(type="hidden", name="fecha", value=fecha)
-      if hora
-        input(type="hidden", name="hora", value=hora)
+      .form-group
+        label(for="hora") Hora:
+        input(type="time", name="hora", required)
 
-      label(for="dni") DNI del paciente:
-      input(type="text", name="dni", required)
+      .form-group
+        label(for="medico_id") Médico:
+        select(name="medico_id", required)
+          each medico in medicos
+            option(value=medico.id_medico)= medico.nombre
 
-      label(for="medico_id") Médico:
-      select(name="medico_id")
-        each medico in medicos
-          option(value=medico.id selected=(medico.id == medico_id))= medico.nombre
+      .form-group
+        label(for="paciente_dni") DNI del paciente:
+        input(type="text", name="paciente_dni", required, maxlength="10")
 
-      if hora
-        p.mt-2 Hora propuesta: strong= hora
+      button.btn(type="submit") Crear Sobreturno
 
-      button(type="submit").btn.btn-primary.mt-4 Crear Sobreturno
+    a.btn(href="/programacion") ← Volver a programación

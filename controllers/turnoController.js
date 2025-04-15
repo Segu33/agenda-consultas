@@ -66,7 +66,7 @@ exports.getAvailable = async (req, res) => {
     }
 };
 exports.confirmarTurno = async (req, res) => {
-    const { horarioId, dni, nombre, telefono, sobreturno } = req.body;
+    const { fecha, hora, medico_id, sucursal_id, dni, nombre, telefono, sobreturno } = req.body;
   
     try {
       // Buscar paciente por DNI
@@ -74,23 +74,25 @@ exports.confirmarTurno = async (req, res) => {
   
       if (!paciente) {
         const [nombreCompleto, ...resto] = nombre.trim().split(' ');
-        const apellido = resto.join(' ') || '---'; // Por si solo ponen un nombre
+        const apellido = resto.join(' ') || '---';
   
         paciente = await Paciente.create({
           nombre: nombreCompleto,
           apellido,
           dni,
           telefono,
-          email: `${dni}@temporal.com` // Podés generar un email temporal si no se carga desde el form
+          email: `${dni}@temporal.com` // temporal si no hay email
         });
       }
   
-      // Crear el turno
+      // Crear el turno (o sobreturno)
       await Turno.create({
-        paciente_id: paciente.id_paciente,
-        horario_id: horarioId, // Asegurate que exista en tu modelo de Turno
-        sobreturno: sobreturno === 'on',
-        estado: sobreturno === 'on' ? 'sobreturno' : 'reservado'
+        id_paciente: paciente.id_paciente,
+        id_medico: medico_id,
+        id_sucursal: sucursal_id,
+        fecha,
+        hora,
+        estado: sobreturno === 'on' ? 'reservado' : 'reservado' // usar solo estados válidos por ahora
       });
   
       res.redirect('/programacion?success=1');
@@ -99,7 +101,7 @@ exports.confirmarTurno = async (req, res) => {
       res.redirect('/programacion?error=1');
     }
   };
-  const { validationResult } = require('express-validator');
+  
 
 exports.create = async (req, res) => {
   const errors = validationResult(req);
@@ -117,4 +119,31 @@ exports.create = async (req, res) => {
     // ...validaciones y creación del turno
     res.redirect('/turnos');
   };
-  
+  const Sobreturno = require('../models/Sobreturno'); // Asegurate de importar el modelo
+
+exports.crearSobreturno = async (req, res) => {
+  const { fecha, hora, medico_id, paciente_dni } = req.body;
+
+  try {
+    // Buscar o crear paciente
+    let paciente = await Paciente.findOne({ where: { dni: paciente_dni } });
+
+    if (!paciente) {
+      return res.status(404).send('Paciente no encontrado. Debe estar registrado previamente.');
+    }
+
+    // Crear sobreturno
+    await Sobreturno.create({
+      fecha,
+      hora,
+      id_medico: medico_id,
+      id_paciente: paciente.id_paciente
+    });
+
+    res.redirect('/programacion?success=sobreturno');
+  } catch (error) {
+    console.error('Error al crear sobreturno:', error);
+    res.redirect('/programacion?error=sobreturno');
+  }
+};
+

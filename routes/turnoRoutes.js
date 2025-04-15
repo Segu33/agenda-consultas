@@ -8,6 +8,7 @@ router.get('/:id', turnoController.getById);
 router.post('/', turnoController.create);
 router.put('/:id', turnoController.update);
 router.delete('/:id', turnoController.delete);
+router.post('/sobreturno', turnoController.crearSobreturno);
 
 // Ruta para obtener turnos disponibles según médico y fecha
 router.get('/disponibles', turnoController.getAvailable);

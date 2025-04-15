@@ -7,25 +7,25 @@ block content
     form.filtros(method="GET", action="/programacion")
       .filtro-group
         label(for="fecha") Fecha:
-        input(type="date", name="fecha", required)
+        input(type="date", name="fecha", required, value=fechaSeleccionada)
 
         label(for="medico") Médico:
         select(name="medico")
           option(value="") Todos
           each medico in medicos
-            option(value=medico.id)= medico.nombre
+            option(value=medico.id selected=medico.id == medicoSeleccionado)= medico.nombre
 
         label(for="especialidad") Especialidad:
         select(name="especialidad")
           option(value="") Todas
           each especialidad in especialidades
-            option(value=especialidad.id)= especialidad.nombre
+            option(value=especialidad.id selected=especialidad.id == especialidadSeleccionada)= especialidad.nombre
 
         label(for="sucursal") Sucursal:
         select(name="sucursal")
           option(value="") Todas
           each sucursal in sucursales
-            option(value=sucursal.id)= sucursal.nombre
+            option(value=sucursal.id selected=sucursal.id == sucursalSeleccionada)= sucursal.nombre
 
         button(type="submit").btn Buscar
 
@@ -49,13 +49,19 @@ block content
                   span.estado.bloqueado Bloqueado
               td
                 if horario.estado == 'disponible'
-                  form(method="POST", action=`/turnos/agendar/${horario.id}`)
-                    button.btn-agendar(type="submit") Agendar
-                else if horario.estado == 'bloqueado'
-                  a.btn-sobreturno(href=`/sobreturno/crear?fecha=${fecha}&hora=${horario.hora}&medico_id=${medico_id}`) Sobreturno
-                else
-                  | -
-    else
-      p No hay horarios disponibles.
-      a.btn-sobreturno(href=`/sobreturno/crear?fecha=${fecha}&medico_id=${medico_id}`) Crear sobreturno manualmente
-a(href=`/sobreturno/crear?fecha=${fechaSeleccionada}&hora=${horaDeseada}&medico_id=${medicoSeleccionado}`).btn-sobreturno Crear Sobreturno
+                  form(method="POST", action="/turnos/confirmar")
+                    input(type="hidden", name="fecha", value=horario.fecha)
+                    input(type="hidden", name="hora", value=horario.hora)
+                    input(type="hidden", name="medico_id", value=horario.medico_id)
+                    input(type="hidden", name="sucursal_id", value=horario.sucursal_id)
+
+                    // Datos del paciente
+                    input(type="text", name="dni", placeholder="DNI", required)
+                    input(type="text", name="nombre", placeholder="Nombre completo", required)
+                    input(type="text", name="telefono", placeholder="Teléfono")
+
+                    button(type="submit").btn-agendar Confirmar
+                else if horario.estado == 'ocupado'
+                  a.btn-sobreturno(
+                    href=`/sobreturno/form?fecha=${horario.fecha}&hora=${horario.hora}&medico=${horario.medico_id}&sucursal=${horario.sucursal_id}`
+                  ) Crear sobreturno
