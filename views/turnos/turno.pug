@@ -1,0 +1,28 @@
+extends layout
+
+block content
+  h1 Crear Turno
+
+  form(action="/turnos" method="POST")
+    label(for="fecha") Fecha:
+    input(type="date" name="fecha" required)
+
+    label(for="hora") Hora:
+    input(type="time" name="hora" required)
+
+    label(for="id_medico") Médico:
+    select(name="id_medico" required)
+      //- Opciones de médicos
+
+    label(for="id_paciente") Paciente:
+    select(name="id_paciente" required)
+      //- Opciones de pacientes
+
+    label(for="id_sucursal") Sucursal:
+    select(name="id_sucursal" required)
+      //- Opciones de sucursales
+
+    label(for="sobreturno") Sobreturno:
+    input(type="checkbox" name="sobreturno")
+
+    button(type="submit") Crear Turno

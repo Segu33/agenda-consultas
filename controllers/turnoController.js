@@ -99,4 +99,22 @@ exports.confirmarTurno = async (req, res) => {
       res.redirect('/programacion?error=1');
     }
   };
+  const { validationResult } = require('express-validator');
+
+exports.create = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  try {
+    const newTurno = await Turno.create(req.body);
+    res.status(201).json(newTurno);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al crear turno' });
+  }
+};
+exports.create = async (req, res) => {
+    // ...validaciones y creación del turno
+    res.redirect('/turnos');
+  };
   
