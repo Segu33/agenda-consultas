@@ -45,54 +45,17 @@ block content
                   span.estado.disponible Disponible
                 else if horario.estado == 'ocupado'
                   span.estado.ocupado Ocupado
-                else if horario.estado == 'sobreturno'
-                  span.estado.sobreturno Sobreturno
                 else
                   span.estado.bloqueado Bloqueado
               td
                 if horario.estado == 'disponible'
                   form(method="POST", action=`/turnos/agendar/${horario.id}`)
-                    button(type="submit").btn-agendar Agendar
+                    button.btn-agendar(type="submit") Agendar
+                else if horario.estado == 'bloqueado'
+                  a.btn-sobreturno(href=`/sobreturno/crear?fecha=${fecha}&hora=${horario.hora}&medico_id=${medico_id}`) Sobreturno
                 else
                   | -
-        else
-      p No hay horarios cargados para esta combinación.
-
-    //- Formulario para paciente (aparece después de seleccionar un horario)
-    hr
-    h3 Asignar paciente al turno seleccionado
-
-    form(method="POST", action="/turnos/confirmar")
-      input(type="hidden", name="horarioId", id="horarioId")
-
-      .form-group
-        label(for="dni") DNI:
-        input(type="text", name="dni", id="dni", placeholder="Ej: 30123456", required)
-
-      .form-group
-        label(for="nombre") Nombre completo:
-        input(type="text", name="nombre", id="nombre", required)
-
-      .form-group
-        label(for="telefono") Teléfono:
-        input(type="text", name="telefono", id="telefono")
-
-      .form-group
-        label(for="sobreturno") ¿Es sobreturno?
-        input(type="checkbox", name="sobreturno", id="sobreturno")
-
-      button.btn-confirmar(type="submit") Confirmar Turno
-  script.
-    document.querySelectorAll('.btn-agendar').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const horarioId = btn.closest('form').action.split('/').pop();
-        document.getElementById('horarioId').value = horarioId;
-
-        // Scroll al formulario
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: 'smooth'
-        });
-      });
-    });
+    else
+      p No hay horarios disponibles.
+      a.btn-sobreturno(href=`/sobreturno/crear?fecha=${fecha}&medico_id=${medico_id}`) Crear sobreturno manualmente
+a(href=`/sobreturno/crear?fecha=${fechaSeleccionada}&hora=${horaDeseada}&medico_id=${medicoSeleccionado}`).btn-sobreturno Crear Sobreturno

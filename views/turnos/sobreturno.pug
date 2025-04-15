@@ -1,0 +1,26 @@
+extends layout
+
+block content
+  .container
+    h2 Crear Sobreturno
+
+    if error
+      p.text-red-500= error
+
+    form(method="POST", action="/sobreturno/crear")
+      input(type="hidden", name="fecha", value=fecha)
+      if hora
+        input(type="hidden", name="hora", value=hora)
+
+      label(for="dni") DNI del paciente:
+      input(type="text", name="dni", required)
+
+      label(for="medico_id") Médico:
+      select(name="medico_id")
+        each medico in medicos
+          option(value=medico.id selected=(medico.id == medico_id))= medico.nombre
+
+      if hora
+        p.mt-2 Hora propuesta: strong= hora
+
+      button(type="submit").btn.btn-primary.mt-4 Crear Sobreturno
