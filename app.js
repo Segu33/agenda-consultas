@@ -7,6 +7,7 @@ const Medico = require('./models/Medico');
 const Paciente = require('./models/Paciente');
 
 
+
 // Configurar Pug como motor de plantillas
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
