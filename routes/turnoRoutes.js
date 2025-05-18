@@ -1,23 +1,19 @@
 // turnoRoutes.js
 const express = require('express');
+const { body } = require('express-validator');
 const router = express.Router();
 const turnoController = require('../controllers/turnoController');
 
+// Obtener todos los turnos
 router.get('/', turnoController.getAll);
-router.get('/:id', turnoController.getById);
-router.post('/', turnoController.create);
-router.put('/:id', turnoController.update);
-router.delete('/:id', turnoController.delete);
-router.post('/sobreturno', turnoController.crearSobreturno);
 
-// Ruta para obtener turnos disponibles según médico y fecha
+// Obtener un turno por ID
+router.get('/:id', turnoController.getById);
+
+// Obtener turnos disponibles según médico y fecha
 router.get('/disponibles', turnoController.getAvailable);
 
-module.exports = router;
-// Ruta para confirmar turno desde programación rápida
-router.post('/confirmar', turnoController.confirmarTurno);
-const { body } = require('express-validator');
-
+// Crear un nuevo turno con validación
 router.post('/',
   [
     body('fecha').isISO8601().withMessage('Fecha inválida'),
@@ -28,3 +24,17 @@ router.post('/',
   ],
   turnoController.create
 );
+
+// Confirmar turno desde programación rápida
+router.post('/confirmar', turnoController.confirmarTurno);
+
+// Crear sobreturno (debes implementar la función en el controlador)
+router.post('/sobreturno', turnoController.crearSobreturno);
+
+// Actualizar un turno
+router.put('/:id', turnoController.update);
+
+// Eliminar un turno
+router.delete('/:id', turnoController.delete);
+
+module.exports = router;

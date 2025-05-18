@@ -4,7 +4,6 @@ const Sucursal = require('./Sucursal');
 const AgendaCerrada = require('./agendaCerrada');
 const Turno = require('./Turno');
 const Paciente = require('./Paciente');
-const Sobreturno = require('./Sobreturno');
 const Especialidad = require('./Especialidad');
 const MedicoEspecialidad = require('./MedicoEspecialidad');
 
@@ -27,7 +26,6 @@ module.exports = {
     AgendaCerrada,
     Turno,
     Paciente,
-    Sobreturno,
     Especialidad,
     MedicoEspecialidad,
 };

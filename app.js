@@ -6,6 +6,7 @@ const sequelize = require('./configdb');
 const Medico = require('./models/Medico');
 const Paciente = require('./models/Paciente');
 
+
 // Configurar Pug como motor de plantillas
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -19,7 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const medicoRoutes = require('./routes/medicoRoutes');
 const pacienteRoutes = require('./routes/pacienteRoutes');
 const turnoRoutes = require('./routes/turnoRoutes');
-const sobreturnoRoutes = require('./routes/sobreturnoRoutes');
+// const sobreturnoRoutes = require('./routes/sobreturnoRoutes'); // Eliminado porque no existe
 const agendaCerradaRoutes = require('./routes/agendaCerradaRoutes');
 
 // Ruta de inicio que prueba la conexión a la base de datos
@@ -50,8 +51,7 @@ app.get('/agendar-turno', async (req, res) => {
 app.use('/medicos', medicoRoutes);
 app.use('/pacientes', pacienteRoutes);
 app.use('/turnos', turnoRoutes);
-app.use('/sobreturnos', sobreturnoRoutes);
+// app.use('/sobreturnos', sobreturnoRoutes); // Eliminado porque no existe
 app.use('/agenda-cerrada', agendaCerradaRoutes);
-
 
 module.exports = app;

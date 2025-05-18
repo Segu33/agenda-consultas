@@ -30,6 +30,14 @@ const Turno = sequelize.define('Turno', {
   obra_social: {
     type: DataTypes.STRING(100),
     allowNull: true
+  },
+  ocupado: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  es_sobreturno: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   }
 }, {
   timestamps: false
@@ -40,4 +48,3 @@ Turno.belongsTo(Paciente, { foreignKey: 'id_paciente', onDelete: 'CASCADE' });
 Turno.belongsTo(Sucursal, { foreignKey: 'id_sucursal', onDelete: 'CASCADE' });
 
 module.exports = Turno;
-
