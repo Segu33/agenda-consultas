@@ -1,28 +1,115 @@
-extends layout
+doctype html
+html(lang="es")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Registrar Sobreturno
 
-block content
-  .container
-    h2 Registrar Sobreturno
+    style.
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        background-color: #f2f2f2;
+      }
+      .container {
+        max-width: 600px;
+        width: 100%;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input, select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        border: none;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
 
-    form(method="POST", action="/turnos/sobreturno")
-      .form-group
-        label(for="fecha") Fecha:
-        input(type="date", name="fecha", required)
+    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+    script.
+      $(document).ready(function () {
+        $('#dni').on('blur', function () {
+          const dni = $(this).val();
+          if (dni.length >= 6) {
+            $.get(`/pacientes/buscar?dni=${dni}`, function (data) {
+              if (data && data.nombre) {
+                $('#nombre').val(data.nombre).prop('readonly', true);
+                $('#telefono').val(data.telefono).prop('readonly', true);
+              } else {
+                $('#nombre').val('').prop('readonly', false);
+                $('#telefono').val('').prop('readonly', false);
+              }
+            }).fail(() => {
+              $('#nombre, #telefono').val('').prop('readonly', false);
+            });
+          }
+        });
+      });
 
-      .form-group
-        label(for="hora") Hora:
-        input(type="time", name="hora", required)
+  body
+    .container
+      h2 Registrar Sobreturno
 
-      .form-group
-        label(for="medico_id") Médico:
-        select(name="medico_id", required)
-          each medico in medicos
-            option(value=medico.id_medico)= medico.nombre
+      form(method="POST", action="/turnos/sobreturno")
+        .form-group
+          label(for="fecha") Fecha:
+          input(type="date", name="fecha", required)
 
-      .form-group
-        label(for="paciente_dni") DNI del paciente:
-        input(type="text", name="paciente_dni", required, maxlength="10")
+        .form-group
+          label(for="hora") Hora:
+          input(type="time", name="hora", required)
 
-      button.btn(type="submit") Crear Sobreturno
+        .form-group
+          label(for="medico_id") Médico:
+          select(name="medico_id", required)
+            option(value="" disabled selected) -- Seleccione un médico --
+            each medico in medicos
+              option(value=medico.id_medico)= medico.nombre
 
-    a.btn(href="/programacion") ← Volver a programación
+        .form-group
+          label(for="dni") DNI del Paciente:
+          input(type="text", name="paciente_dni", id="dni", required)
+
+        .form-group
+          label(for="nombre") Nombre:
+          input(type="text", name="paciente_nombre", id="nombre", required)
+
+        .form-group
+          label(for="telefono") Teléfono:
+          input(type="text", name="paciente_telefono", id="telefono")
+
+        button(type="submit") Crear Sobreturno
+
+      a(href="/programacion") ← Volver a programación

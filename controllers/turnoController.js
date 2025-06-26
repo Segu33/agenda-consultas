@@ -1,18 +1,33 @@
 const { validationResult } = require('express-validator');
 const Turno = require('../models/Turno');
 const Paciente = require('../models/Paciente');
+const Medico = require('../models/Medico');
 
-// Obtener todos los turnos
+// Renderizar la vista de todos los turnos
+exports.mostrarVistaTurnos = async (req, res) => {
+  try {
+    const turnos = await Turno.findAll({
+      include: [Medico, Paciente],
+      order: [['fecha', 'ASC'], ['hora', 'ASC']]
+    });
+
+    res.render('turnos', { turnos });
+  } catch (error) {
+    console.error('Error al renderizar turnos:', error);
+    res.status(500).send('Error al mostrar los turnos');
+  }
+};
+
+// Obtener todos los turnos (API REST)
 exports.getAll = async (req, res) => {
   try {
     const turnos = await Turno.findAll();
     res.json(turnos);
   } catch (error) {
-    console.error('Error en getAll:', error); // 🔍 muestra el error real
+    console.error('Error en getAll:', error);
     res.status(500).json({ error: 'Error al obtener turnos' });
   }
 };
-
 
 // Obtener un turno por ID
 exports.getById = async (req, res) => {
@@ -73,12 +88,11 @@ exports.getAvailable = async (req, res) => {
   }
 };
 
-// Confirmar turno desde formulario (puede ser turno o sobreturno)
+// Confirmar turno desde formulario
 exports.confirmarTurno = async (req, res) => {
   const { fecha, hora, medico_id, sucursal_id, dni, nombre, telefono, sobreturno } = req.body;
 
   try {
-    // Buscar o crear paciente
     let paciente = await Paciente.findOne({ where: { dni } });
 
     if (!paciente) {
@@ -94,7 +108,6 @@ exports.confirmarTurno = async (req, res) => {
       });
     }
 
-    // Crear el turno (marcando si es sobreturno con un campo opcional)
     await Turno.create({
       id_paciente: paciente.id_paciente,
       id_medico: medico_id,
@@ -102,7 +115,7 @@ exports.confirmarTurno = async (req, res) => {
       fecha,
       hora,
       estado: 'reservado',
-      es_sobreturno: sobreturno === 'on' // suponiendo que este campo exista
+      es_sobreturno: sobreturno === 'on'
     });
 
     res.redirect('/programacion?success=1');
@@ -110,7 +123,9 @@ exports.confirmarTurno = async (req, res) => {
     console.error('Error al confirmar turno:', error);
     res.redirect('/programacion?error=1');
   }
-};// Crear sobreturno (a completar según tu lógica)
+};
+
+// Crear sobreturno (placeholder)
 exports.crearSobreturno = async (req, res) => {
   res.send('crearSobreturno aún no implementado.');
 };

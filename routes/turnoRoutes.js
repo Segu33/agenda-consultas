@@ -1,16 +1,18 @@
-// turnoRoutes.js
 const express = require('express');
 const { body } = require('express-validator');
 const router = express.Router();
 const turnoController = require('../controllers/turnoController');
 
-// Obtener todos los turnos
+// Mostrar todos los turnos en vista
+router.get('/vista', turnoController.mostrarVistaTurnos);
+
+// Obtener todos los turnos (API REST)
 router.get('/', turnoController.getAll);
 
 // Obtener un turno por ID
 router.get('/:id', turnoController.getById);
 
-// Obtener turnos disponibles según médico y fecha
+// Obtener turnos disponibles
 router.get('/disponibles', turnoController.getAvailable);
 
 // Crear un nuevo turno con validación
@@ -28,7 +30,7 @@ router.post('/',
 // Confirmar turno desde programación rápida
 router.post('/confirmar', turnoController.confirmarTurno);
 
-// Crear sobreturno (debes implementar la función en el controlador)
+// Crear sobreturno
 router.post('/sobreturno', turnoController.crearSobreturno);
 
 // Actualizar un turno
