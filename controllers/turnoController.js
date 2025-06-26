@@ -3,7 +3,7 @@ const Turno = require('../models/Turno');
 const Paciente = require('../models/Paciente');
 const Medico = require('../models/Medico');
 
-// Renderizar la vista de todos los turnos
+// Mostrar la vista de turnos con datos completos
 exports.mostrarVistaTurnos = async (req, res) => {
   try {
     const turnos = await Turno.findAll({
@@ -11,12 +11,13 @@ exports.mostrarVistaTurnos = async (req, res) => {
       order: [['fecha', 'ASC'], ['hora', 'ASC']]
     });
 
-    res.render('turnos', { turnos });
+    res.render('turnos/lista-turnos', { turnos }); // asegurate de que la vista exista
   } catch (error) {
     console.error('Error al renderizar turnos:', error);
     res.status(500).send('Error al mostrar los turnos');
   }
 };
+
 
 // Obtener todos los turnos (API REST)
 exports.getAll = async (req, res) => {
