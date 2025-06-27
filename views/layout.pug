@@ -9,87 +9,134 @@ html(lang="es")
     link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap", rel="stylesheet")
     link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
 
-    //- Estilos embebidos
     style.
       * {
         box-sizing: border-box;
-      }
-
-      body {
         margin: 0;
-        font-family: 'Inter', sans-serif;
-        background-color: #eaf6fb;
-        color: #1e3a5f;
+        padding: 0;
       }
 
-      header {
-        background-color: #1e3a5f;
-        padding: 16px 24px;
-        color: white;
+      body, html {
+        font-family: 'Inter', sans-serif;
+        background-color: #f0f8fb;
+        color: #1e3a5f;
+        width: 100%;
+        height: 100%;
+      }
+
+      .navbar {
+        background-color: #004d66;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding: 16px 32px;
         flex-wrap: wrap;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
       }
 
-      header h1 {
-        margin: 0;
+      .navbar .logo {
         font-size: 24px;
-      }
-
-      nav {
-        margin-top: 10px;
-      }
-
-      nav a {
+        font-weight: bold;
         color: white;
-        margin-right: 16px;
+      }
+
+      .navbar .nav-links {
+        display: flex;
+        gap: 20px;
+      }
+
+      .navbar .nav-links a {
+        color: white;
         text-decoration: none;
         font-weight: 600;
         font-size: 15px;
       }
 
-      nav a:hover {
+      .navbar .nav-links a:hover {
         text-decoration: underline;
       }
 
+      .navbar .actions a {
+        margin-left: 12px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+      }
+
+      .green { background-color: #4caf50; }
+      .blue { background-color: #2196f3; }
+      .dark { background-color: #0d47a1; }
+
       main {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 40px 24px;
-        min-height: 80vh;
+        display: block;
       }
 
       .container {
-        background-color: #fff;
+        background-color: white;
         padding: 32px;
         border-radius: 16px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         width: 100%;
         max-width: 960px;
+        margin: auto;
+      }
+
+      .hero {
+        position: relative;
+        width: 100%;
+        height: 75vh;
+        background: url('/images/clinica-fondo.jpg') center/cover no-repeat;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .hero .overlay {
+        background-color: rgba(0, 60, 80, 0.65);
+        color: white;
+        padding: 40px;
+        border-radius: 12px;
+        max-width: 80%;
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .hero p {
+        font-size: 1.2rem;
       }
 
       footer {
-        background-color: #1e3a5f;
+        background-color: #002f3d;
         color: white;
         text-align: center;
-        padding: 14px 20px;
+        padding: 16px;
         font-size: 14px;
       }
 
   body
-    header
-      h1 Agenda De Consultorios
-      nav
+    .navbar
+      .logo Agenda Consultorios
+      .nav-links
         a(href="/") Inicio
         a(href="/medicos") Médicos
         a(href="/pacientes") Pacientes
         a(href="/turnos") Turnos
+        a(href="/contacto") Contacto
+      .actions
+        a(href="/turnos", class="green") Turnos
+        a(href="/recetas", class="blue") Recetas
+        a(href="/estudios", class="dark") Mis Estudios
 
     main
       block content
 
     footer
-      p © Luis Segura 2025 Todos los derechos reservados.
-
+      p © Luis Segura 2025 - Todos los derechos reservados.
