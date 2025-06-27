@@ -36,10 +36,10 @@ html(lang="es")
         z-index: 1000;
       }
 
-      .navbar .logo {
-        font-size: 24px;
-        font-weight: bold;
-        color: white;
+      .navbar .logo img {
+        height: 150px;
+        width: auto;
+        margin-right: 50px;
       }
 
       .navbar .nav-links {
@@ -123,13 +123,20 @@ html(lang="es")
 
   body
     .navbar
-      .logo Agenda Consultorios
+      .logo
+        a(href="/")
+          img(src="/images/logo.png", alt="Agenda Consultorios")
+
       .nav-links
         a(href="/") Inicio
         a(href="/medicos") Médicos
         a(href="/pacientes") Pacientes
         a(href="/turnos") Turnos
+        a(href="/Obras Sociales") Obras Sociales
+        a(href="/Especialidades") Especialidades
+        a(href="/Horarios") Horarios
         a(href="/contacto") Contacto
+
       .actions
         a(href="/turnos", class="green") Turnos
         a(href="/recetas", class="blue") Recetas
