@@ -1,0 +1,14 @@
+extends layout
+
+block content
+  .hero-especialidades
+    h2.text-3xl.font-semibold.text-center.mt-8 Nuestras especialidades
+
+  .especialidades-container
+    each columna in columnas
+      .card-especialidades
+        .header-icon
+          i.fas.fa-user
+        ul.lista-especialidades
+          each especialidad in columna
+            li= especialidad

@@ -1,20 +1,20 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configdb');
 
-const Especialidad = sequelize.define('Especialidad', {
-  id_especialidad: {
+const ObraSocial = sequelize.define('ObraSocial', {
+  id_obra_social: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
   nombre: {
     type: DataTypes.STRING(100),
-    allowNull: false
+    allowNull: false,
+    unique: true
   }
 }, {
-  tableName: 'especialidades', // ✅ Esto es lo que faltaba
+  tableName: 'obras_sociales',
   timestamps: false
 });
 
-module.exports = Especialidad;
-
+module.exports = ObraSocial;

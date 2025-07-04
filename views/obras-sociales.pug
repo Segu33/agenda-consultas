@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  .hero-obras
+    h2.text-3xl.font-semibold.text-center.mt-8 Obras sociales y prepagas que recibimos
+    p.text-center.mt-2.text-gray-600 (consultar en función de la especialidad que necesita)
+
+  .obras-container
+    each columna in columnas
+      .card-obras
+        .header-icon
+          i.fas.fa-info-circle
+        ul.lista-obras
+          each obra in columna
+            li= obra

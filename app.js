@@ -5,8 +5,8 @@ const app = express();
 const sequelize = require('./configdb');
 const Medico = require('./models/Medico');
 const Paciente = require('./models/Paciente');
-
-
+const especialidadRoutes = require('./routes/especialidadRoutes.js');
+const obrasSocialesRoutes = require('./routes/obrasSocialesRoutes');
 
 // Configurar Pug como motor de plantillas
 app.set('view engine', 'pug');
@@ -54,5 +54,7 @@ app.use('/pacientes', pacienteRoutes);
 app.use('/turnos', turnoRoutes);
 // app.use('/sobreturnos', sobreturnoRoutes); // Eliminado porque no existe
 app.use('/agenda-cerrada', agendaCerradaRoutes);
+app.use('/', especialidadRoutes);
+app.use('/', obrasSocialesRoutes);
 
 module.exports = app;
