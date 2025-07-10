@@ -1,4 +1,4 @@
-//- views/turnos/agendar-turno.pug
+extends ../layout 
 doctype html
 html(lang="es")
   head
@@ -46,7 +46,6 @@ html(lang="es")
         background-color: #0056b3;
       }
 
-    // jQuery para manejar las llamadas AJAX de actualización de horario
     script(src="https://code.jquery.com/jquery-3.6.0.min.js")
     script.
       $(document).ready(function() {
@@ -57,7 +56,7 @@ html(lang="es")
             $.get(`/turnos/disponibles?medico_id=${idMedico}&fecha=${fecha}`, function(data) {
               $('#selectHorario').empty().append('<option value="" disabled selected>-- Seleccione un horario --</option>');
               data.forEach(turno => {
-                $('#selectHorario').append(`<option value="${turno.id_turno}">${turno.hora}</option>`);
+                $('#selectHorario').append(`<option value="${turno.hora}">${turno.hora}</option>`);
               });
             });
           }
@@ -89,8 +88,9 @@ html(lang="es")
 
         // Selección de horario
         label(for="selectHorario") Seleccione el Horario
-        select(id="selectHorario" name="id_horario" required)
+        select(id="selectHorario" name="hora" required)
           option(value="" disabled selected) -- Seleccione un horario --
 
         // Botón de envío
         button(type="submit") Confirmar Turno
+

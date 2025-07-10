@@ -4,6 +4,7 @@ html(lang="es")
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title= title || "Agenda Médica"
+
     link(rel="preconnect", href="https://fonts.googleapis.com")
     link(rel="preconnect", href="https://fonts.gstatic.com" crossorigin)
     link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap", rel="stylesheet")
@@ -45,6 +46,8 @@ html(lang="es")
       .navbar .nav-links {
         display: flex;
         gap: 20px;
+        align-items: center;
+        position: relative;
       }
 
       .navbar .nav-links a {
@@ -52,10 +55,45 @@ html(lang="es")
         text-decoration: none;
         font-weight: 600;
         font-size: 15px;
+        padding: 8px 12px;
       }
 
       .navbar .nav-links a:hover {
         text-decoration: underline;
+      }
+
+      .dropdown {
+        position: relative;
+      }
+
+      .dropdown ul {
+        display: none;
+        position: absolute;
+        background-color: #004d66;
+        list-style: none;
+        padding: 10px 0;
+        margin: 0;
+        top: 100%;
+        left: 0;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        z-index: 1001;
+        min-width: 180px;
+      }
+
+      .dropdown:hover ul {
+        display: block;
+      }
+
+      .dropdown ul li a {
+        display: block;
+        padding: 10px 20px;
+        color: white;
+        text-decoration: none;
+      }
+
+      .dropdown ul li a:hover {
+        background-color: #006680;
       }
 
       .navbar .actions a {
@@ -131,7 +169,15 @@ html(lang="es")
         a(href="/") Inicio
         a(href="/medicos") Médicos
         a(href="/pacientes") Pacientes
-        a(href="/turnos") Turnos
+
+        .dropdown
+          a(href="#") Turnos ▾
+          ul
+            li: a(href="/turnos") Lista de Turnos
+            li: a(href="/agendar-turno") Formulario Público
+            li: a(href="/turnos/sobreturno") Sobreturno
+            li: a(href="/turnos/nuevo") Crear Manual
+
         a(href="/obras-sociales") Obras Sociales
         a(href="/Especialidades") Especialidades
         a(href="/Horarios") Horarios

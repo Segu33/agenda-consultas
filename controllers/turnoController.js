@@ -130,3 +130,61 @@ exports.confirmarTurno = async (req, res) => {
 exports.crearSobreturno = async (req, res) => {
   res.send('crearSobreturno aún no implementado.');
 };
+const { Agenda } = require('../models');
+const { Op } = require('sequelize');
+
+exports.obtenerHorariosDisponibles = async (req, res) => {
+  const { medico_id, fecha } = req.query;
+
+  try {
+    const agenda = await Agenda.findOne({ where: { id_medico: medico_id } });
+    if (!agenda) return res.json([]);
+
+    const diaSemana = new Date(fecha).getDay(); // 0: domingo, 1: lunes...
+    const diasPermitidos = agenda.dias.split(',').map(d => d.trim());
+
+    if (!diasPermitidos.includes(diaSemana.toString())) {
+      return res.json([]);
+    }
+
+    const horaInicio = agenda.hora_inicio;
+    const horaFin = agenda.hora_fin;
+    const duracion = agenda.duracion_turno;
+
+    const turnosTomados = await Turno.findAll({
+      where: {
+        id_medico: medico_id,
+        fecha,
+        ocupado: true
+      }
+    });
+
+    const horasTomadas = turnosTomados.map(t => t.hora);
+
+    const horariosDisponibles = generarHorarios(horaInicio, horaFin, duracion)
+      .filter(hora => !horasTomadas.includes(hora));
+
+    res.json(horariosDisponibles.map(hora => ({ hora })));
+  } catch (error) {
+    console.error('Error al obtener horarios disponibles:', error);
+    res.status(500).json([]);
+  }
+};
+
+function generarHorarios(inicio, fin, duracionMin) {
+  const result = [];
+  let [h, m] = inicio.split(':').map(Number);
+  const [fh, fm] = fin.split(':').map(Number);
+
+  while (h < fh || (h === fh && m < fm)) {
+    const horaStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:00`;
+    result.push(horaStr);
+    m += duracionMin;
+    if (m >= 60) {
+      h += Math.floor(m / 60);
+      m = m % 60;
+    }
+  }
+
+  return result;
+}

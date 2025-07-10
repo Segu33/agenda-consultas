@@ -7,7 +7,7 @@ const Medico = require('./models/Medico');
 const Paciente = require('./models/Paciente');
 const especialidadRoutes = require('./routes/especialidadRoutes.js');
 const obrasSocialesRoutes = require('./routes/obrasSocialesRoutes');
-
+const horariosRoutes = require('./routes/horariosRoutes');
 // Configurar Pug como motor de plantillas
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -56,5 +56,6 @@ app.use('/turnos', turnoRoutes);
 app.use('/agenda-cerrada', agendaCerradaRoutes);
 app.use('/', especialidadRoutes);
 app.use('/', obrasSocialesRoutes);
+app.use('/Horarios', horariosRoutes);
 
 module.exports = app;
