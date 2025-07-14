@@ -1,0 +1,28 @@
+extends layout
+
+block content
+  .contact-header
+    h3 Urquiza 1100 (M5515ECO) Coquimbito Maipú -
+    h3 Mendoza - Argentina
+
+  .contact-container
+    .contact-form
+      h2 ¡Contáctanos!
+
+      form(action="/contacto", method="POST")
+        .form-group
+          label(for="nombre") NOMBRE
+          input(type="text", name="nombre", id="nombre", placeholder="Nombre", required)
+
+        .form-group
+          label(for="email") EMAIL
+          input(type="email", name="email", id="email", placeholder="Email", required)
+
+        .form-group
+          label(for="mensaje") MENSAJE
+          textarea(name="mensaje", id="mensaje", rows="5", placeholder="Mensaje", required)
+
+        button(type="submit") ENVIAR MENSAJE
+
+    .contact-image
+      img(src="/images/doctor-contacto.jpg", alt="Doctora")

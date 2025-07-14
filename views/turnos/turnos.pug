@@ -12,15 +12,21 @@ block content
 
     label(for="id_medico") Médico:
     select(name="id_medico" required)
-      //- Opciones de médicos
+      option(value="" disabled selected) -- Seleccione un médico --
+      each medico in medicos
+        option(value=medico.id_medico)= medico.nombre + ' ' + medico.apellido
 
     label(for="id_paciente") Paciente:
     select(name="id_paciente" required)
-      //- Opciones de pacientes
+      option(value="" disabled selected) -- Seleccione un paciente --
+      each paciente in pacientes
+        option(value=paciente.id_paciente)= paciente.nombre + ' ' + paciente.apellido
 
     label(for="id_sucursal") Sucursal:
     select(name="id_sucursal" required)
-      //- Opciones de sucursales
+      option(value="" disabled selected) -- Seleccione una sucursal --
+      each sucursal in sucursales
+        option(value=sucursal.id_sucursal)= sucursal.nombre
 
     label(for="sobreturno") Sobreturno:
     input(type="checkbox" name="sobreturno")

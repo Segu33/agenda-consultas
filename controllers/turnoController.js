@@ -2,8 +2,11 @@ const { validationResult } = require('express-validator');
 const Turno = require('../models/Turno');
 const Paciente = require('../models/Paciente');
 const Medico = require('../models/Medico');
+const Sucursal = require('../models/Sucursal'); // <-- IMPORTANTE
+const { Agenda } = require('../models');
+const { Op } = require('sequelize');
 
-// Mostrar la vista de turnos con datos completos
+// Mostrar la vista con todos los turnos
 exports.mostrarVistaTurnos = async (req, res) => {
   try {
     const turnos = await Turno.findAll({
@@ -11,13 +14,31 @@ exports.mostrarVistaTurnos = async (req, res) => {
       order: [['fecha', 'ASC'], ['hora', 'ASC']]
     });
 
-    res.render('turnos/lista-turnos', { turnos }); // asegurate de que la vista exista
+    res.render('turnos/lista-turnos', { turnos });
   } catch (error) {
     console.error('Error al renderizar turnos:', error);
     res.status(500).send('Error al mostrar los turnos');
   }
 };
 
+// Mostrar formulario manual para crear un turno
+exports.mostrarFormularioCrearTurno = async (req, res) => {
+  try {
+    const medicos = await Medico.findAll();
+    const pacientes = await Paciente.findAll();
+    const sucursales = await Sucursal.findAll();
+
+    res.render('turnos/turnos', {
+      title: 'Crear Turno',
+      medicos,
+      pacientes,
+      sucursales
+    });
+  } catch (error) {
+    console.error('Error al cargar formulario manual:', error);
+    res.status(500).send('Error al mostrar formulario de turnos');
+  }
+};
 
 // Obtener todos los turnos (API REST)
 exports.getAll = async (req, res) => {
@@ -89,7 +110,7 @@ exports.getAvailable = async (req, res) => {
   }
 };
 
-// Confirmar turno desde formulario
+// Confirmar turno desde programación rápida
 exports.confirmarTurno = async (req, res) => {
   const { fecha, hora, medico_id, sucursal_id, dni, nombre, telefono, sobreturno } = req.body;
 
@@ -130,9 +151,8 @@ exports.confirmarTurno = async (req, res) => {
 exports.crearSobreturno = async (req, res) => {
   res.send('crearSobreturno aún no implementado.');
 };
-const { Agenda } = require('../models');
-const { Op } = require('sequelize');
 
+// Obtener horarios disponibles según agenda
 exports.obtenerHorariosDisponibles = async (req, res) => {
   const { medico_id, fecha } = req.query;
 
@@ -140,7 +160,7 @@ exports.obtenerHorariosDisponibles = async (req, res) => {
     const agenda = await Agenda.findOne({ where: { id_medico: medico_id } });
     if (!agenda) return res.json([]);
 
-    const diaSemana = new Date(fecha).getDay(); // 0: domingo, 1: lunes...
+    const diaSemana = new Date(fecha).getDay(); // 0: domingo
     const diasPermitidos = agenda.dias.split(',').map(d => d.trim());
 
     if (!diasPermitidos.includes(diaSemana.toString())) {

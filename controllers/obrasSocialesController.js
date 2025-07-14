@@ -4,14 +4,21 @@ exports.listarObrasSociales = async (req, res) => {
   try {
     const obras = await ObraSocial.findAll({ order: [['nombre', 'ASC']] });
 
-    const columnas = [[], [], []];
-    obras.forEach((obra, i) => {
-      columnas[i % 3].push(obra.nombre);
-    });
+    const total = obras.length;
+    const tercio = Math.ceil(total / 3);
 
-    res.render('obras-sociales', { columnas });
-  } catch (error) {
-    console.error('Error al cargar obras sociales:', error);
-    res.status(500).send('Error interno del servidor');
+    const grupo1 = obras.slice(0, tercio).map(o => o.nombre);
+    const grupo2 = obras.slice(tercio, 2 * tercio).map(o => o.nombre);
+    const grupo3 = obras.slice(2 * tercio).map(o => o.nombre);
+
+    res.render('obras-sociales', {
+      title: 'Obras Sociales',
+      grupo1,
+      grupo2,
+      grupo3
+    });
+  } catch (err) {
+    console.error('Error al cargar obras sociales:', err);
+    res.status(500).send('Error al cargar obras sociales');
   }
 };

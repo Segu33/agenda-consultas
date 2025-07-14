@@ -1,4 +1,4 @@
-const sequelize = require('sequelize');
+const sequelize = require('../configdb'); // la instancia de conexión real
 const Medico = require('./Medico');
 const Sucursal = require('./Sucursal');
 const AgendaCerrada = require('./agendaCerrada');
