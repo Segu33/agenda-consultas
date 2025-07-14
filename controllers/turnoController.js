@@ -64,12 +64,31 @@ exports.getById = async (req, res) => {
 // Crear un nuevo turno (API REST)
 exports.create = async (req, res) => {
   try {
-    const newTurno = await Turno.create(req.body);
-    res.status(201).json(newTurno);
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      console.error('Errores de validación:', errores.array());
+      return res.status(400).json({ errores: errores.array() });
+    }
+
+    const { fecha, hora, id_medico, id_paciente, id_sucursal, sobreturno } = req.body;
+
+    const nuevoTurno = await Turno.create({
+      fecha,
+      hora,
+      id_medico,
+      id_paciente,
+      id_sucursal,
+      estado: 'reservado',
+      es_sobreturno: sobreturno === 'on'
+    });
+
+    res.status(201).json(nuevoTurno);
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear turno' });
+    console.error('Error al crear turno:', error);
+    res.status(500).json({ error: 'Error al crear turno', detalle: error.message });
   }
 };
+
 
 // Actualizar un turno
 exports.update = async (req, res) => {
