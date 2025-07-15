@@ -1,0 +1,37 @@
+extends ../layout
+
+block content
+  .container
+    .titulo
+      i.fas.fa-calendar-check.me-2
+      | Turno generado exitosamente
+
+    .detalle-turno.mt-4
+      ul
+        li
+          strong Fecha: 
+          | #{turno.fecha}
+        li
+          strong Hora: 
+          | #{turno.hora}
+        li
+          strong Médico: 
+          | #{turno.Medico?.nombre || 'No especificado'}
+        li
+          strong Paciente: 
+          | #{turno.Paciente?.nombre || 'No especificado'}
+        li
+          strong Sucursal: 
+          | #{turno.Sucursal?.nombre || 'No especificada'}
+        li
+          strong Estado: 
+          | #{turno.estado}
+        li
+          strong Obra Social: 
+          | #{turno.obra_social || 'No especificada'}
+        li
+          strong Motivo de consulta: 
+          | #{turno.motivo_consulta || 'No indicado'}
+
+    .text-center.mt-4
+      a(href="/", style="background-color: #006a8e; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;") Volver al inicio

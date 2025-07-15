@@ -1,9 +1,5 @@
 const { validationResult } = require('express-validator');
-const Turno = require('../models/Turno');
-const Paciente = require('../models/Paciente');
-const Medico = require('../models/Medico');
-const Sucursal = require('../models/Sucursal'); // <-- IMPORTANTE
-const { Agenda } = require('../models');
+const { Turno, Paciente, Medico, Sucursal, Agenda } = require('../models');
 const { Op } = require('sequelize');
 
 // Mostrar la vista con todos los turnos
@@ -51,7 +47,7 @@ exports.getAll = async (req, res) => {
   }
 };
 
-// Obtener un turno por ID
+// Obtener un turno por ID (JSON)
 exports.getById = async (req, res) => {
   try {
     const turno = await Turno.findByPk(req.params.id);
@@ -61,7 +57,24 @@ exports.getById = async (req, res) => {
   }
 };
 
-// Crear un nuevo turno (API REST)
+// Mostrar un turno generado (Vista)
+exports.mostrarTurno = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const turno = await Turno.findByPk(id, {
+      include: [Medico, Paciente, Sucursal]
+    });
+    if (!turno) {
+      return res.status(404).send('Turno no encontrado');
+    }
+    res.render('turnos/turno-generado', { turno });
+  } catch (error) {
+    console.error('Error al mostrar turno:', error);
+    res.status(500).send('Error interno');
+  }
+};
+
+// Crear un nuevo turno (con validación)
 exports.create = async (req, res) => {
   try {
     const errores = validationResult(req);
@@ -70,8 +83,25 @@ exports.create = async (req, res) => {
       return res.status(400).json({ errores: errores.array() });
     }
 
-    const { fecha, hora, id_medico, id_paciente, id_sucursal, sobreturno } = req.body;
+    const { fecha, hora, id_medico, id_paciente, id_sucursal, motivo_consulta, obra_social, sobreturno } = req.body;
 
+    // Validación de turno ya existente (si no es sobreturno)
+    if (sobreturno !== 'on') {
+      const turnoExistente = await Turno.findOne({
+        where: {
+          fecha,
+          hora,
+          id_medico,
+          es_sobreturno: false
+        }
+      });
+
+      if (turnoExistente) {
+        return res.redirect(`/turnos/sobreturno?fecha=${fecha}&hora=${hora}&id_medico=${id_medico}&id_paciente=${id_paciente}`);
+      }
+    }
+
+    // Crear nuevo turno
     const nuevoTurno = await Turno.create({
       fecha,
       hora,
@@ -79,16 +109,18 @@ exports.create = async (req, res) => {
       id_paciente,
       id_sucursal,
       estado: 'reservado',
+      motivo_consulta,
+      obra_social,
+      ocupado: true,
       es_sobreturno: sobreturno === 'on'
     });
 
-    res.status(201).json(nuevoTurno);
+    res.redirect(`/turnos/${nuevoTurno.id_turno}`);
   } catch (error) {
     console.error('Error al crear turno:', error);
     res.status(500).json({ error: 'Error al crear turno', detalle: error.message });
   }
 };
-
 
 // Actualizar un turno
 exports.update = async (req, res) => {
@@ -149,17 +181,31 @@ exports.confirmarTurno = async (req, res) => {
       });
     }
 
-    await Turno.create({
+    const turnoExistente = await Turno.findOne({
+      where: {
+        fecha,
+        hora,
+        id_medico: medico_id,
+        es_sobreturno: false
+      }
+    });
+
+    if (turnoExistente && sobreturno !== 'on') {
+      return res.redirect(`/turnos/sobreturno?fecha=${fecha}&hora=${hora}&id_medico=${medico_id}&id_paciente=${paciente.id_paciente}`);
+    }
+
+    const turno = await Turno.create({
       id_paciente: paciente.id_paciente,
       id_medico: medico_id,
       id_sucursal: sucursal_id,
       fecha,
       hora,
       estado: 'reservado',
+      ocupado: true,
       es_sobreturno: sobreturno === 'on'
     });
 
-    res.redirect('/programacion?success=1');
+    res.redirect(`/turnos/${turno.id_turno}`);
   } catch (error) {
     console.error('Error al confirmar turno:', error);
     res.redirect('/programacion?error=1');
