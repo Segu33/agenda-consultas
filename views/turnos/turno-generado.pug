@@ -1,37 +1,50 @@
 extends ../layout
 
 block content
-  .container
-    .titulo
-      i.fas.fa-calendar-check.me-2
-      | Turno generado exitosamente
+  .container.mt-5
+    h2 Turno Generado Exitosamente
+    ul
+      li
+        strong Fecha:
+        |  #{turno.fecha}
+      li
+        strong Hora:
+        |  #{turno.hora}
+      li
+        strong Estado:
+        |  #{turno.estado}
 
-    .detalle-turno.mt-4
-      ul
-        li
-          strong Fecha: 
-          | #{turno.fecha}
-        li
-          strong Hora: 
-          | #{turno.hora}
-        li
-          strong Médico: 
-          | #{turno.Medico?.nombre || 'No especificado'}
-        li
-          strong Paciente: 
-          | #{turno.Paciente?.nombre || 'No especificado'}
-        li
-          strong Sucursal: 
-          | #{turno.Sucursal?.nombre || 'No especificada'}
-        li
-          strong Estado: 
-          | #{turno.estado}
-        li
-          strong Obra Social: 
-          | #{turno.obra_social || 'No especificada'}
-        li
-          strong Motivo de consulta: 
-          | #{turno.motivo_consulta || 'No indicado'}
+      li
+        strong Médico: 
+        if turno.Medico
+          | #{turno.Medico.nombre}
+        else
+          | No especificado
 
-    .text-center.mt-4
-      a(href="/", style="background-color: #006a8e; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;") Volver al inicio
+      li
+        strong Paciente:
+        if turno.Paciente
+          | #{turno.Paciente.nombre}
+        else
+          | No especificado
+
+      li
+        strong Sucursal:
+        if turno.Sucursal
+          | #{turno.Sucursal.nombre}
+        else
+          | No especificada
+
+      li
+        strong Obra social:
+        | #{turno.obra_social || 'No especificada'}
+
+      li
+        strong Motivo de consulta:
+        | #{turno.motivo_consulta || 'No especificado'}
+
+      li
+        strong ¿Es sobreturno?:
+        | #{turno.es_sobreturno ? 'Sí' : 'No'}
+
+    a.btn.btn-primary.mt-3(href="/") Volver al inicio

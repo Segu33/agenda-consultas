@@ -1,116 +1,59 @@
-extends layout
-doctype html
-html(lang="es")
-  head
-    meta(charset="UTF-8")
-    meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    title Registrar Sobreturno
+extends ../layout
 
-    style.
-      body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        padding: 0;
-        background-color: #f2f2f2;
-      }
-      .container {
-        max-width: 600px;
-        width: 100%;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-      h2 {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .form-group {
-        margin-bottom: 15px;
-      }
-      label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-      }
-      input, select {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      button {
-        width: 100%;
-        padding: 10px;
-        background-color: #007bff;
-        border: none;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        border-radius: 4px;
-        margin-top: 10px;
-      }
-      button:hover {
-        background-color: #0056b3;
-      }
+block content
+  .container
+    h2 Registrar Sobreturno
 
-    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
-    script.
-      $(document).ready(function () {
-        $('#dni').on('blur', function () {
-          const dni = $(this).val();
-          if (dni.length >= 6) {
-            $.get(`/pacientes/buscar?dni=${dni}`, function (data) {
-              if (data && data.nombre) {
-                $('#nombre').val(data.nombre).prop('readonly', true);
-                $('#telefono').val(data.telefono).prop('readonly', true);
-              } else {
-                $('#nombre').val('').prop('readonly', false);
-                $('#telefono').val('').prop('readonly', false);
-              }
-            }).fail(() => {
-              $('#nombre, #telefono').val('').prop('readonly', false);
-            });
-          }
-        });
+    form(method="POST", action="/turnos/sobreturno")
+      .form-group
+        label(for="fecha") Fecha:
+        input(type="date", name="fecha", required)
+
+      .form-group
+        label(for="hora") Hora:
+        input(type="time", name="hora", required)
+
+      .form-group
+        label(for="medico_id") Médico:
+        select(name="medico_id", required)
+          option(value="" disabled selected) -- Seleccione un médico --
+          each medico in medicos
+            option(value=medico.id_medico)= medico.nombre
+
+      .form-group
+        label(for="dni") DNI del Paciente:
+        input(type="text", name="paciente_dni", id="dni", required)
+
+      .form-group
+        label(for="nombre") Nombre:
+        input(type="text", name="paciente_nombre", id="nombre", required)
+
+      .form-group
+        label(for="telefono") Teléfono:
+        input(type="text", name="paciente_telefono", id="telefono")
+
+      button(type="submit") Crear Sobreturno
+
+    a(href="/programacion") ← Volver a programación
+
+  // Scripts al final del bloque content
+  script(src="/js/validacion.js")
+  script.
+    $(document).ready(function () {
+      $('#dni').on('blur', function () {
+        const dni = $(this).val();
+        if (dni.length >= 6) {
+          $.get(`/pacientes/buscar?dni=${dni}`, function (data) {
+            if (data && data.nombre) {
+              $('#nombre').val(data.nombre).prop('readonly', true);
+              $('#telefono').val(data.telefono).prop('readonly', true);
+            } else {
+              $('#nombre').val('').prop('readonly', false);
+              $('#telefono').val('').prop('readonly', false);
+            }
+          }).fail(() => {
+            $('#nombre, #telefono').val('').prop('readonly', false);
+          });
+        }
       });
-
-  body
-    .container
-      h2 Registrar Sobreturno
-
-      form(method="POST", action="/turnos/sobreturno")
-        .form-group
-          label(for="fecha") Fecha:
-          input(type="date", name="fecha", required)
-
-        .form-group
-          label(for="hora") Hora:
-          input(type="time", name="hora", required)
-
-        .form-group
-          label(for="medico_id") Médico:
-          select(name="medico_id", required)
-            option(value="" disabled selected) -- Seleccione un médico --
-            each medico in medicos
-              option(value=medico.id_medico)= medico.nombre
-
-        .form-group
-          label(for="dni") DNI del Paciente:
-          input(type="text", name="paciente_dni", id="dni", required)
-
-        .form-group
-          label(for="nombre") Nombre:
-          input(type="text", name="paciente_nombre", id="nombre", required)
-
-        .form-group
-          label(for="telefono") Teléfono:
-          input(type="text", name="paciente_telefono", id="telefono")
-
-        button(type="submit") Crear Sobreturno
-
-      a(href="/programacion") ← Volver a programación
+    });

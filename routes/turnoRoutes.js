@@ -6,7 +6,11 @@ const Medico = require('../models/Medico');
 const Paciente = require('../models/Paciente');
 const Sucursal = require('../models/Sucursal'); // ✅ Necesario para formulario manual
 
-// Formulario público de turnos
+// ------------------------
+// Formularios públicos
+// ------------------------
+
+// Formulario público para agendar turno
 router.get('/agendar-turno', async (req, res) => {
   try {
     const medicos = await Medico.findAll();
@@ -18,7 +22,7 @@ router.get('/agendar-turno', async (req, res) => {
   }
 });
 
-// Formulario para sobreturno
+// Formulario de sobreturno
 router.get('/sobreturno', async (req, res) => {
   try {
     const medicos = await Medico.findAll();
@@ -29,7 +33,7 @@ router.get('/sobreturno', async (req, res) => {
   }
 });
 
-// Formulario de carga manual de turnos
+// Formulario interno de carga manual de turnos
 router.get('/nuevo', async (req, res) => {
   try {
     const medicos = await Medico.findAll();
@@ -42,17 +46,28 @@ router.get('/nuevo', async (req, res) => {
   }
 });
 
-// Horarios disponibles por agenda
-router.get('/disponibles', turnoController.obtenerHorariosDisponibles);
+// ------------------------
+// Consultas y vistas
+// ------------------------
 
-// Listar todos los turnos (vista)
+// Vista principal de turnos (lista)
 router.get('/', turnoController.mostrarVistaTurnos);
 
-// API REST
-router.get('/api', turnoController.getAll);
-router.get('/:id', turnoController.getById);
+// Ver un turno generado (vista)
+router.get('/:id', turnoController.mostrarTurno);
 
-// Crear nuevo turno
+// ------------------------
+// API REST
+// ------------------------
+
+router.get('/api', turnoController.getAll);
+router.get('/api/:id', turnoController.getById); // ✅ JSON de un solo turno
+
+// ------------------------
+// Lógica de creación y confirmación
+// ------------------------
+
+// Crear turno desde formularios (manual y público)
 router.post(
   '/',
   [
@@ -65,14 +80,23 @@ router.post(
   turnoController.create
 );
 
-// Confirmación de turno (desde programación rápida)
+// Confirmar turno desde pantalla de programación rápida
 router.post('/confirmar', turnoController.confirmarTurno);
 
-// Crear sobreturno
+// Crear sobreturno (manual)
 router.post('/sobreturno', turnoController.crearSobreturno);
 
-// Editar y eliminar
+// ------------------------
+// Edición y eliminación
+// ------------------------
+
 router.put('/:id', turnoController.update);
 router.delete('/:id', turnoController.delete);
+
+// ------------------------
+// Horarios disponibles (por agenda)
+// ------------------------
+
+router.get('/disponibles', turnoController.obtenerHorariosDisponibles);
 
 module.exports = router;

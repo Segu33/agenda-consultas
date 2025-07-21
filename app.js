@@ -60,5 +60,5 @@ app.use('/', especialidadRoutes);
 app.use('/', obrasSocialesRoutes);
 app.use('/Horarios', horariosRoutes);
 app.use('/', contactoRoutes);
-
+app.use(express.static(path.join(__dirname, 'public')));
 module.exports = app;
