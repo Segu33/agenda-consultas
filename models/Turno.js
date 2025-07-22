@@ -1,8 +1,6 @@
+// models/Turno.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configdb');
-const Medico = require('./Medico');
-const Paciente = require('./Paciente');
-const Sucursal = require('./Sucursal');
 
 const Turno = sequelize.define('Turno', {
   id_turno: {
@@ -19,16 +17,15 @@ const Turno = sequelize.define('Turno', {
     allowNull: false
   },
   estado: {
-    type: DataTypes.ENUM('reservado', 'confirmado', 'cancelado', 'ausente', 'presente', 'en consulta', 'atendido'),
-    allowNull: false,
+    type: DataTypes.STRING,
     defaultValue: 'reservado'
   },
   motivo_consulta: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.STRING,
     allowNull: true
   },
   obra_social: {
-    type: DataTypes.STRING(100),
+    type: DataTypes.STRING,
     allowNull: true
   },
   ocupado: {
@@ -38,13 +35,14 @@ const Turno = sequelize.define('Turno', {
   es_sobreturno: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
+  },
+  duracion_turno: {
+    type: DataTypes.INTEGER,
+    allowNull: true
   }
 }, {
+  tableName: 'turnos',
   timestamps: false
 });
-
-Turno.belongsTo(Medico, { foreignKey: 'id_medico', onDelete: 'CASCADE' });
-Turno.belongsTo(Paciente, { foreignKey: 'id_paciente', onDelete: 'CASCADE' });
-Turno.belongsTo(Sucursal, { foreignKey: 'id_sucursal', onDelete: 'CASCADE' });
 
 module.exports = Turno;

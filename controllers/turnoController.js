@@ -1,6 +1,47 @@
 const { validationResult } = require('express-validator');
-const { Turno, Paciente, Medico, Sucursal, Agenda } = require('../models');
+const { Turno, Paciente, Medico, Sucursal, Agenda, AgendaCerrada } = require('../models');
 const { Op } = require('sequelize');
+const moment = require('moment');
+
+// Función para validar turno contra la agenda y cierres
+async function validarTurnoContraAgenda(id_medico, fecha, hora) {
+  const diaSemana = moment(fecha).format('dddd').toLowerCase(); // ej: 'lunes'
+
+  // Buscar agendas del médico donde el día esté habilitado (campo 'dias' como string CSV de días en minúscula)
+  const agendas = await Agenda.findAll({
+    where: {
+      id_medico,
+      dias: { [Op.like]: `%${diaSemana}%` }
+    }
+  });
+
+  if (!agendas || agendas.length === 0) {
+    return { valido: false, motivo: 'El médico no atiende ese día' };
+  }
+
+  // Validar que la hora esté dentro del horario de alguna agenda
+  const agendaValida = agendas.find(agenda => {
+    return hora >= agenda.hora_inicio && hora <= agenda.hora_fin;
+  });
+
+  if (!agendaValida) {
+    return { valido: false, motivo: 'La hora está fuera del horario de atención' };
+  }
+
+  // Verificar cierres por feriados o vacaciones
+  const cierre = await AgendaCerrada.findOne({
+    where: {
+      id_medico,
+      fecha
+    }
+  });
+
+  if (cierre) {
+    return { valido: false, motivo: 'La agenda está cerrada ese día' };
+  }
+
+  return { valido: true, agenda: agendaValida };
+}
 
 // Mostrar la vista con todos los turnos
 exports.mostrarVistaTurnos = async (req, res) => {
@@ -28,7 +69,9 @@ exports.mostrarFormularioCrearTurno = async (req, res) => {
       title: 'Crear Turno',
       medicos,
       pacientes,
-      sucursales
+      sucursales,
+      error: null,
+      datos: {}
     });
   } catch (error) {
     console.error('Error al cargar formulario manual:', error);
@@ -74,7 +117,7 @@ exports.mostrarTurno = async (req, res) => {
   }
 };
 
-// Crear un nuevo turno (con validación)
+// Crear un nuevo turno (con validación contra agenda)
 exports.create = async (req, res) => {
   try {
     const errores = validationResult(req);
@@ -85,8 +128,21 @@ exports.create = async (req, res) => {
 
     const { fecha, hora, id_medico, id_paciente, id_sucursal, motivo_consulta, obra_social, sobreturno } = req.body;
 
-    // Validación de turno ya existente (si no es sobreturno)
     if (sobreturno !== 'on') {
+      // Validar contra agenda
+      const resultadoValidacion = await validarTurnoContraAgenda(id_medico, fecha, hora);
+      if (!resultadoValidacion.valido) {
+        return res.status(400).render('turnos/turnos', {
+          title: 'Crear Turno',
+          medicos: await Medico.findAll(),
+          pacientes: await Paciente.findAll(),
+          sucursales: await Sucursal.findAll(),
+          error: resultadoValidacion.motivo,
+          datos: req.body
+        });
+      }
+
+      // Verificar que no exista turno normal (no sobreturno)
       const turnoExistente = await Turno.findOne({
         where: {
           fecha,
@@ -112,7 +168,8 @@ exports.create = async (req, res) => {
       motivo_consulta,
       obra_social,
       ocupado: true,
-      es_sobreturno: sobreturno === 'on'
+      es_sobreturno: sobreturno === 'on',
+      id_agenda: sobreturno === 'on' ? null : (await validarTurnoContraAgenda(id_medico, fecha, hora)).agenda.id_agenda
     });
 
     res.redirect(`/turnos/${nuevoTurno.id_turno}`);
