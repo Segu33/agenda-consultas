@@ -1,0 +1,96 @@
+if conEstilos
+  style.
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      font-weight: bold;
+      margin-top: 15px;
+      display: block;
+    }
+    select, input[type="text"], input[type="date"], input[type="time"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    input[type="checkbox"] {
+      margin-left: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 4px;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+form(action="/turnos" method="POST")
+  label(for="fecha") Fecha:
+  input(type="date" id="fecha" name="fecha" required value=(datos ? datos.fecha : ''))
+
+  if horarioInteractivo
+    label(for="selectHorario") Horario:
+    select(id="selectHorario" name="hora" required)
+      option(value="" disabled selected) -- Seleccione un horario --
+  else
+    label(for="hora") Hora:
+    input(type="time" name="hora" required value=(datos ? datos.hora : ''))
+
+  label(for="id_medico") Médico:
+  select(id="selectMedico" name="id_medico" required)
+    option(value="" disabled selected) -- Seleccione un médico --
+    each medico in medicos
+      option(
+        value=medico.id_medico,
+        selected=(datos && datos.id_medico == medico.id_medico)
+      ) #{medico.nombre} #{medico.apellido}
+
+  label(for="id_paciente") Paciente:
+  select(id="selectPaciente" name="id_paciente" required)
+    option(value="" disabled selected) -- Seleccione un paciente --
+    each paciente in pacientes
+      option(
+        value=paciente.id_paciente,
+        selected=(datos && datos.id_paciente == paciente.id_paciente)
+      ) #{paciente.nombre} #{paciente.apellido}
+
+  label(for="id_sucursal") Sucursal:
+  select(id="selectSucursal" name="id_sucursal" required)
+    option(value="" disabled selected) -- Seleccione una sucursal --
+    each sucursal in sucursales
+      option(
+        value=sucursal.id_sucursal,
+        selected=(datos && datos.id_sucursal == sucursal.id_sucursal)
+      ) #{sucursal.nombre}
+
+  label(for="motivo_consulta") Motivo de Consulta:
+  input(type="text" name="motivo_consulta" required value=(datos ? datos.motivo_consulta : ''))
+
+  label(for="obra_social") Obra Social:
+  input(type="text" name="obra_social" required value=(datos ? datos.obra_social : ''))
+
+  label(for="sobreturno")
+    input(type="checkbox" name="sobreturno" id="sobreturno" checked=(datos && datos.sobreturno == 'on'))
+    | Sobreturno
+
+  button(type="submit") Confirmar Turno

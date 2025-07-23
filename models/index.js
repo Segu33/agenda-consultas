@@ -1,5 +1,5 @@
 const sequelize = require('../configdb');
-
+const { DataTypes } = require('sequelize'); // 👈 NECESARIO
 const Medico = require('./Medico');
 const Paciente = require('./Paciente');
 const Sucursal = require('./Sucursal');
@@ -8,6 +8,8 @@ const AgendaCerrada = require('./AgendaCerrada');
 const Turno = require('./Turno');
 const Especialidad = require('./Especialidad');
 const MedicoEspecialidad = require('./MedicoEspecialidad');
+const UsuarioModel = require('./Usuario');
+const Usuario = UsuarioModel(sequelize, require('sequelize').DataTypes);
 
 // Asociaciones
 
@@ -48,5 +50,6 @@ module.exports = {
   AgendaCerrada,
   Turno,
   Especialidad,
-  MedicoEspecialidad
+  MedicoEspecialidad,
+  Usuario // ✅ ahora es el modelo correctamente instanciado
 };

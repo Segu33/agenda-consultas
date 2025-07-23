@@ -1,14 +1,26 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const session = require('express-session'); // ➤ Agregado para sesiones
+
 const app = express();
 const sequelize = require('./configdb');
+
+// Modelos necesarios para inicio y agendamiento
 const Medico = require('./models/Medico');
 const Paciente = require('./models/Paciente');
+
+// Rutas de módulos
+const medicoRoutes = require('./routes/medicoRoutes');
+const pacienteRoutes = require('./routes/pacienteRoutes');
+const turnoRoutes = require('./routes/turnoRoutes');
+const agendaCerradaRoutes = require('./routes/agendaCerradaRoutes');
 const especialidadRoutes = require('./routes/especialidadRoutes.js');
 const obrasSocialesRoutes = require('./routes/obrasSocialesRoutes');
 const horariosRoutes = require('./routes/horariosRoutes');
 const contactoRoutes = require('./routes/contactoRoutes');
+const authRoutes = require('./routes/authRoutes'); // ➤ Rutas de autenticación
+
 // Configurar Pug como motor de plantillas
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -18,29 +30,45 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rutas de cada módulo
-const medicoRoutes = require('./routes/medicoRoutes');
-const pacienteRoutes = require('./routes/pacienteRoutes');
-const turnoRoutes = require('./routes/turnoRoutes');
-// const sobreturnoRoutes = require('./routes/sobreturnoRoutes'); // Eliminado porque no existe
-const agendaCerradaRoutes = require('./routes/agendaCerradaRoutes');
+// ➤ Configuración de sesión
+app.use(session({
+    secret: 'clave-secreta-super-segura', // ⚠️ Reemplazar con un valor fuerte en producción
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // true si usás HTTPS
+}));
 
-// Ruta de inicio que prueba la conexión a la base de datos
+// ➤ Middleware para exponer el usuario logueado en todas las vistas
+app.use((req, res, next) => {
+    res.locals.usuario = req.session.usuario || null;
+    next();
+});
+
+// ➤ Rutas de autenticación (deben ir antes que las protegidas)
+app.use(authRoutes);
+
+// Ruta de inicio
 app.get('/', async (req, res) => {
     try {
         await sequelize.authenticate(); // Prueba la conexión
-        res.render('index', { title: 'Agenda de Consultas Médicas', mensaje: 'Conexión exitosa a la base de datos' });
+        res.render('index', {
+            title: 'Agenda de Consultas Médicas',
+            mensaje: 'Conexión exitosa a la base de datos'
+        });
     } catch (error) {
         console.error('Error en la conexión:', error);
-        res.render('index', { title: 'Agenda de Consultas Médicas', mensaje: 'Error al conectar a la base de datos' });
+        res.render('index', {
+            title: 'Agenda de Consultas Médicas',
+            mensaje: 'Error al conectar a la base de datos'
+        });
     }
 });
 
-// Ruta para renderizar la pantalla de agendamiento de turnos
+// Pantalla de agendamiento de turnos
 app.get('/agendar-turno', async (req, res) => {
     try {
-        const medicos = await Medico.findAll(); // Consulta para obtener médicos
-        const pacientes = await Paciente.findAll(); // Consulta para obtener pacientes
+        const medicos = await Medico.findAll();
+        const pacientes = await Paciente.findAll();
 
         res.render('turnos/agendar-turno', { medicos, pacientes });
     } catch (error) {
@@ -49,16 +77,14 @@ app.get('/agendar-turno', async (req, res) => {
     }
 });
 
-// Configuración de las rutas de cada módulo
-
+// Configuración de rutas de módulos
 app.use('/medicos', medicoRoutes);
 app.use('/pacientes', pacienteRoutes);
 app.use('/turnos', turnoRoutes);
-// app.use('/sobreturnos', sobreturnoRoutes); // Eliminado porque no existe
 app.use('/agenda-cerrada', agendaCerradaRoutes);
 app.use('/', especialidadRoutes);
 app.use('/', obrasSocialesRoutes);
 app.use('/Horarios', horariosRoutes);
 app.use('/', contactoRoutes);
-app.use(express.static(path.join(__dirname, 'public')));
+
 module.exports = app;

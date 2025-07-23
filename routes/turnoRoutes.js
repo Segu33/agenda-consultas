@@ -1,10 +1,13 @@
 const express = require('express');
 const { body } = require('express-validator');
 const router = express.Router();
+
 const turnoController = require('../controllers/turnoController');
 const Medico = require('../models/Medico');
 const Paciente = require('../models/Paciente');
-const Sucursal = require('../models/Sucursal'); // ✅ Necesario para formulario manual
+const Sucursal = require('../models/Sucursal');
+// ✅ Middlewares de autorización
+const { verificarAdmin, verificarUsuario } = require('../middlewares/roles');
 
 // ------------------------
 // Formularios públicos
@@ -33,8 +36,11 @@ router.get('/sobreturno', async (req, res) => {
   }
 });
 
-// Formulario interno de carga manual de turnos
-router.get('/nuevo', async (req, res) => {
+// ------------------------
+// Formularios internos (requiere admin)
+// ------------------------
+
+router.get('/nuevo', verificarAdmin, async (req, res) => {
   try {
     const medicos = await Medico.findAll();
     const pacientes = await Paciente.findAll();
@@ -47,29 +53,27 @@ router.get('/nuevo', async (req, res) => {
 });
 
 // ------------------------
-// Consultas y vistas
+// Consultas y vistas (requiere usuario autenticado)
 // ------------------------
 
-// Vista principal de turnos (lista)
-router.get('/', turnoController.mostrarVistaTurnos);
-
-// Ver un turno generado (vista)
-router.get('/:id', turnoController.mostrarTurno);
+router.get('/', verificarUsuario, turnoController.mostrarVistaTurnos);
+router.get('/:id', verificarUsuario, turnoController.mostrarTurno);
 
 // ------------------------
 // API REST
 // ------------------------
 
-router.get('/api', turnoController.getAll);
-router.get('/api/:id', turnoController.getById); // ✅ JSON de un solo turno
+router.get('/api', verificarUsuario, turnoController.getAll);
+router.get('/api/:id', verificarUsuario, turnoController.getById);
 
 // ------------------------
 // Lógica de creación y confirmación
 // ------------------------
 
-// Crear turno desde formularios (manual y público)
+// Crear turno (manual o desde público) → requiere admin
 router.post(
   '/',
+  verificarAdmin,
   [
     body('fecha').isISO8601().withMessage('Fecha inválida'),
     body('hora').matches(/^([0-1]\d|2[0-3]):([0-5]\d)$/).withMessage('Hora inválida'),
@@ -80,23 +84,23 @@ router.post(
   turnoController.create
 );
 
-// Confirmar turno desde pantalla de programación rápida
-router.post('/confirmar', turnoController.confirmarTurno);
+// Confirmar turno desde pantalla de programación rápida → requiere usuario
+router.post('/confirmar', verificarUsuario, turnoController.confirmarTurno);
 
-// Crear sobreturno (manual)
-router.post('/sobreturno', turnoController.crearSobreturno);
-
-// ------------------------
-// Edición y eliminación
-// ------------------------
-
-router.put('/:id', turnoController.update);
-router.delete('/:id', turnoController.delete);
+// Crear sobreturno (requiere admin)
+router.post('/sobreturno', verificarAdmin, turnoController.crearSobreturno);
 
 // ------------------------
-// Horarios disponibles (por agenda)
+// Edición y eliminación (requiere admin)
 // ------------------------
 
-router.get('/disponibles', turnoController.obtenerHorariosDisponibles);
+router.put('/:id', verificarAdmin, turnoController.update);
+router.delete('/:id', verificarAdmin, turnoController.delete);
+
+// ------------------------
+// Horarios disponibles (requiere usuario)
+// ------------------------
+
+router.get('/disponibles', verificarUsuario, turnoController.obtenerHorariosDisponibles);
 
 module.exports = router;

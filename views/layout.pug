@@ -341,9 +341,11 @@ html(lang="es")
         a(href="/contacto") Contacto
 
       .actions
-        a(href="/turnos", class="green") Turnos
-        a(href="/recetas", class="blue") Recetas
-        a(href="/estudios", class="dark") Mis Estudios
+        if usuario
+          span Bienvenido, #{usuario.email}
+          a(href="/logout", class="dark") Cerrar sesión
+        else
+          a(href="/login", class="green") Iniciar sesión
 
     main
       block content
