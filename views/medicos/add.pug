@@ -1,8 +1,7 @@
-//- add.pug
 extends ../layout
 
 block content
-  h1 Agregar Médico
+  h1.text-center.mb-4 Agregar Médico
 
   style.
     form {
@@ -51,24 +50,29 @@ block content
 
   form(action='/medicos/create', method="post")
     label Nombre:
-    input(type="text" name="nombre")
+    input(type="text", name="nombre", required)
 
     label Apellido:
-    input(type="text" name="apellido")
+    input(type="text", name="apellido", required)
 
     label DNI:
-    input(type="text" name="dni")
+    input(type="text", name="dni", required)
 
     label Email:
-    input(type="text" name="email")
+    input(type="text", name="email", required)
 
     label Teléfono:
-    input(type="text" name="telefono")
+    input(type="text", name="telefono")
 
     label Estado:
-    select(name="estado")
-      option(value=true) Activo
+    select(name="estado", required)
+      option(value=true selected) Activo
       option(value=false) Inactivo
 
-    button(type="submit") Guardar
+    label Especialidad:
+    select(name="id_especialidad", required)
+      option(value='') -- Seleccionar Especialidad --
+      each especialidad in especialidades
+        option(value=especialidad.id_especialidad)= especialidad.nombre
 
+    button(type="submit") Guardar

@@ -1,45 +1,96 @@
 extends ../layout
 
 block content
-  h1 Editar Médico
+  h2.text-center.mb-4 Editar Médico
 
+  style.
+    form {
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+      color: #333;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+  // Formulario de edición
   form(action=`/medicos/update/${medico.id_medico}`, method="post")
     label Nombre:
-    input(type="text" name="nombre" value=medico.nombre)
+    input(type="text", name="nombre", value=medico.nombre, required)
 
     label Apellido:
-    input(type="text" name="apellido" value=medico.apellido)
+    input(type="text", name="apellido", value=medico.apellido, required)
 
     label DNI:
-    input(type="text" name="dni" value=medico.dni)
+    input(type="text", name="dni", value=medico.dni, required)
 
     label Email:
-    input(type="text" name="email" value=medico.email)
+    input(type="text", name="email", value=medico.email, required)
 
     label Teléfono:
-    input(type="text" name="telefono" value=medico.telefono)
+    input(type="text", name="telefono", value=medico.telefono)
 
     label Estado:
-    select(name="estado")
+    select(name="estado", required)
       option(value=true, selected=medico.estado === true) Activo
       option(value=false, selected=medico.estado === false) Inactivo
 
     button(type="submit") Guardar cambios
 
-  //- Formulario para asignar especialidades
-  h2 Asignar Especialidad
+  // Asignar nueva especialidad
+  h3.text-center.mt-5.mb-3 Asignar Especialidad
   form(action=`/medicos/${medico.id_medico}/asignar-especialidad`, method="post")
-    select(name="especialidadId")
-      each especialidad in especialidades
-        option(value=especialidad.id_especialidad) #{especialidad.nombre}
-    button(type="submit") Asignar Especialidad
+    .d-flex.justify-content-center.align-items-center.gap-3
+      select(name="especialidadId", required)
+        option(value='') -- Seleccionar Especialidad --
+        each especialidad in especialidades
+          option(value=especialidad.id_especialidad)= especialidad.nombre
+      button.btn.btn-primary(type="submit") Asignar
 
-  //- Lista de especialidades asignadas con opción para eliminar
-  h2 Especialidades Asignadas
-  ul
-    each especialidad in medico.Especialidads
-      li
-        span #{especialidad.nombre}
-        form(action=`/medicos/${medico.id_medico}/eliminar-especialidad`, method="post", style="display:inline")
-          input(type="hidden" name="especialidadId" value=especialidad.id_especialidad)
-          button(type="submit") Eliminar
+  // Especialidades actuales
+  if medico.especialidades.length
+    h3.text-center.mt-5 Especialidades Asignadas
+    ul.list-group.mt-3.mb-5(style="max-width: 600px; margin: auto;")
+      each especialidad in medico.Especialidads
+        li.list-group-item.d-flex.justify-content-between.align-items-center
+          span= especialidad.nombre
+          form(action=`/medicos/${medico.id_medico}/eliminar-especialidad`, method="post", style="margin:0")
+            input(type="hidden", name="especialidadId", value=especialidad.id_especialidad)
+            button.btn.btn-sm.btn-danger(type="submit") Eliminar
+  else
+    p.text-center.mt-4.text-muted No hay especialidades asignadas.

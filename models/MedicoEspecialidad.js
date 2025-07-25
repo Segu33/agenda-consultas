@@ -25,11 +25,21 @@ const MedicoEspecialidad = sequelize.define('MedicoEspecialidad', {
         allowNull: true
     }
 }, {
+    tableName: 'medico_especialidad', // ← clave para resolver tu error
     timestamps: false
 });
 
-// Relaciona Medico y Especialidad a través de MedicoEspecialidad
-Medico.belongsToMany(Especialidad, { through: MedicoEspecialidad, foreignKey: 'id_medico' });
-Especialidad.belongsToMany(Medico, { through: MedicoEspecialidad, foreignKey: 'id_especialidad' });
+// Relación muchos a muchos
+Medico.belongsToMany(Especialidad, {
+  through: MedicoEspecialidad,
+  foreignKey: 'id_medico',
+  as: 'especialidades'
+});
+
+Especialidad.belongsToMany(Medico, {
+  through: MedicoEspecialidad,
+  foreignKey: 'id_especialidad',
+  as: 'medicos'
+});
 
 module.exports = MedicoEspecialidad;

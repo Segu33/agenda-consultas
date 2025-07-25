@@ -1,22 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const medicoController = require('../controllers/medicoController');
+const Especialidad = require('../models/Especialidad');
 
+// Lista de médicos
+router.get('/', medicoController.getAll);
 
-router.get('/', medicoController.getAll);// Obtener todos los médicos
+// Formulario para agregar médico con especialidades
+router.get('/add', async (req, res) => {
+  const especialidades = await Especialidad.findAll();
+  res.render('medicos/add', { especialidades });
+});
 
-router.get('/add', (req, res) => res.render('medicos/add'));// Renderizar el formulario para agregar médicos
+// Crear nuevo médico
+router.post('/create', medicoController.create);
 
-router.post('/create', medicoController.create);// Crear un nuevo médico
+// Mostrar formulario de edición
+router.get('/edit/:id', medicoController.showEditForm);
 
-router.get('/edit/:id', medicoController.showEditForm);// Mostrar formulario de edición de un médico
+// Actualizar médico
+router.post('/update/:id', medicoController.update);
 
-router.post('/update/:id', medicoController.update);// Actualizar un médico (mediante POST para el formulario HTML)
+// Eliminar médico (usaremos GET para probar más fácil desde navegador)
+router.get('/delete/:id', medicoController.delete);
 
-router.post('/delete/:id', medicoController.delete);// Eliminar un médico (mediante POST para el formulario HTML)
+// Asignar especialidad
+router.post('/:id/asignar-especialidad', medicoController.asignarEspecialidad);
 
-router.post('/:id/asignar-especialidad', medicoController.asignarEspecialidad);// Asignar especialidad a un médico
-
-router.post('/:id/eliminar-especialidad', medicoController.eliminarEspecialidad);// Eliminar especialidad de un médico
+// Eliminar especialidad
+router.post('/:id/eliminar-especialidad', medicoController.eliminarEspecialidad);
 
 module.exports = router;
