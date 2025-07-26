@@ -1,6 +1,7 @@
 const Medico = require('../models/Medico');
 const Especialidad = require('../models/Especialidad');
 
+// Listar todos los médicos
 exports.getAll = async (req, res) => {
     try {
         const medicos = await Medico.findAll({ include: Especialidad });
@@ -11,6 +12,7 @@ exports.getAll = async (req, res) => {
     }
 };
 
+// Mostrar formulario de edición
 exports.showEditForm = async (req, res) => {
     try {
         const medico = await Medico.findByPk(req.params.id, { include: Especialidad });
@@ -23,10 +25,19 @@ exports.showEditForm = async (req, res) => {
     }
 };
 
+// Crear un nuevo médico
 exports.create = async (req, res) => {
     try {
         const { nombre, apellido, dni, email, telefono, estado, id_especialidad } = req.body;
-        const nuevoMedico = await Medico.create({ nombre, apellido, dni, email, telefono, estado });
+
+        const nuevoMedico = await Medico.create({
+            nombre,
+            apellido,
+            dni,
+            email,
+            telefono,
+            estado: estado === '1' // 1 = true (Activo)
+        });
 
         if (id_especialidad) {
             const especialidad = await Especialidad.findByPk(id_especialidad);
@@ -40,9 +51,10 @@ exports.create = async (req, res) => {
     }
 };
 
+// Actualizar un médico
 exports.update = async (req, res) => {
     try {
-        req.body.estado = req.body.estado === 'true' || req.body.estado === true || req.body.estado === 'Activo';
+        req.body.estado = req.body.estado === '1'; // Convertir string a boolean
 
         const actualizado = await Medico.update(req.body, {
             where: { id_medico: req.params.id }
@@ -56,6 +68,7 @@ exports.update = async (req, res) => {
     }
 };
 
+// Eliminar un médico
 exports.delete = async (req, res) => {
     try {
         const eliminado = await Medico.destroy({ where: { id_medico: req.params.id } });
@@ -67,6 +80,7 @@ exports.delete = async (req, res) => {
     }
 };
 
+// Asignar especialidad
 exports.asignarEspecialidad = async (req, res) => {
     try {
         const medico = await Medico.findByPk(req.params.id);
@@ -83,6 +97,7 @@ exports.asignarEspecialidad = async (req, res) => {
     }
 };
 
+// Eliminar especialidad
 exports.eliminarEspecialidad = async (req, res) => {
     try {
         const medico = await Medico.findByPk(req.params.id);

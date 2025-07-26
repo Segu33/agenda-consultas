@@ -1,0 +1,30 @@
+extends ../layouts/layout.pug
+
+block content
+  .container.mt-5
+    .card.shadow.p-4
+      h3.mb-4.text-center Editar Paciente
+
+      form(method="POST", action=`/pacientes/editar/${paciente.id}`)
+        .mb-3
+          label.form-label(for="nombre") Nombre
+          input.form-control(type="text", name="nombre", id="nombre", value=paciente.nombre, required)
+        
+        .mb-3
+          label.form-label(for="apellido") Apellido
+          input.form-control(type="text", name="apellido", id="apellido", value=paciente.apellido, required)
+        
+        .mb-3
+          label.form-label(for="email") Email
+          input.form-control(type="email", name="email", id="email", value=paciente.email, required)
+        
+        .mb-3
+          label.form-label(for="telefono") Teléfono
+          input.form-control(type="text", name="telefono", id="telefono", value=paciente.telefono)
+        
+        .mb-3
+          label.form-label(for="obra_social") Obra Social
+          input.form-control(type="text", name="obra_social", id="obra_social", value=paciente.obra_social)
+
+        button.btn.btn-success(type="submit") Guardar Cambios
+        a.btn.btn-secondary.ms-2(href="/pacientes") Cancelar

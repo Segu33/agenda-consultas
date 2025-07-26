@@ -51,18 +51,39 @@ exports.create = async (req, res) => {
         const { nombre, apellido, dni, email, telefono, obra_social } = req.body;
 
         if (!nombre || !apellido || !dni || !email) {
-            return res.status(400).json({ error: 'Faltan datos obligatorios' });
+            return res.status(400).render('pacientes/agregar-paciente', {
+                title: 'Agregar Paciente',
+                error: 'Faltan datos obligatorios',
+                datos: req.body
+            });
         }
 
         console.log("Datos recibidos:", req.body);
 
-        const newPaciente = await Paciente.create(req.body);
-        res.status(201).json(newPaciente);
+        await Paciente.create(req.body);
+
+        // Redireccionar si fue exitoso
+        res.redirect('/pacientes');
+
     } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            // ⚠️ DNI duplicado u otro campo único repetido
+            return res.status(400).render('pacientes/agregar-paciente', {
+                title: 'Agregar Paciente',
+                error: 'Ya existe un paciente con ese DNI.',
+                datos: req.body
+            });
+        }
+
         console.error('Error al crear paciente:', error);
-        res.status(500).json({ error: 'Error al crear paciente' });
+        res.status(500).render('pacientes/agregar-paciente', {
+            title: 'Agregar Paciente',
+            error: 'Error al crear el paciente',
+            datos: req.body
+        });
     }
 };
+
 
 // Actualizar un paciente
 exports.update = async (req, res) => {

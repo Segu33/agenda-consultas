@@ -1,40 +1,35 @@
-//- views/pacientes/agregar-paciente.pug
-doctype html
-html(lang="es")
-  head
+extends ../layout
 
-    meta(charset="UTF-8")
-    meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    title Agregar Paciente
-    
+block content
+  h1 Agregar Paciente
 
-  body
-    h1 Agregar Nuevo Paciente
+  if error
+    div(style="color: red; font-weight: bold; margin-bottom: 1em")
+      | #{error}
 
-    form(action="/pacientes" method="POST")
-      //- Campo de nombre
-      label(for="nombre") Nombre
-      input(type="text" name="nombre" id="nombre" required maxlength="100")
-      
-      //- Campo de apellido
-      label(for="apellido") Apellido
-      input(type="text" name="apellido" id="apellido" required maxlength="100")
+  form(action="/pacientes" method="POST")
+    label(for="nombre") Nombre:
+    input(type="text" name="nombre" value=(typeof datos !== 'undefined' && datos.nombre ? datos.nombre : ''))
+    br
 
-      //- Campo de DNI
-      label(for="dni") DNI
-      input(type="text" name="dni" id="dni" required maxlength="10")
+    label(for="apellido") Apellido:
+    input(type="text" name="apellido" value=(typeof datos !== 'undefined' && datos.apellido ? datos.apellido : ''))
+    br
 
-      //- Campo de email
-      label(for="email") Email
-      input(type="email" name="email" id="email" required maxlength="100")
+    label(for="dni") DNI:
+    input(type="text" name="dni" value=(typeof datos !== 'undefined' && datos.dni ? datos.dni : ''))
+    br
 
-      //- Campo de teléfono
-      label(for="telefono") Teléfono
-      input(type="text" name="telefono" id="telefono" maxlength="20")
+    label(for="email") Email:
+    input(type="email" name="email" value=(typeof datos !== 'undefined' && datos.email ? datos.email : ''))
+    br
 
-      //- Campo de obra social
-      label(for="obra_social") Obra Social
-      input(type="text" name="obra_social" id="obra_social" maxlength="100")
+    label(for="telefono") Teléfono:
+    input(type="text" name="telefono" value=(typeof datos !== 'undefined' && datos.telefono ? datos.telefono : ''))
+    br
 
-      //- Botón de envío
-      button(type="submit") Agregar Paciente
+    label(for="obra_social") Obra Social:
+    input(type="text" name="obra_social" value=(typeof datos !== 'undefined' && datos.obra_social ? datos.obra_social : ''))
+    br
+
+    button(type="submit") Guardar

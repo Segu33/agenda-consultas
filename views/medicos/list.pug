@@ -2,7 +2,7 @@
 extends ../layout
 
 block content
-  .container.mt-5
+  .container-fluid.mt-5.px-5
     h2.text-center.mb-4 Lista de Médicos
 
     .d-flex.justify-content-between.mb-4
@@ -42,7 +42,7 @@ block content
                 span.badge.bg-success Activo
               else
                 span.badge.bg-secondary Inactivo
-            td
+            td.acciones
               a.btn.btn-sm.btn-warning(href=`/medicos/edit/${medico.id_medico}`) 
                 i.fas.fa-edit.me-1
                 | Editar

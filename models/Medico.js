@@ -39,7 +39,7 @@ const Medico = sequelize.define('Medico', {
     estado: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: true
+        //defaultValue: true//
     }
 }, {
     timestamps: true,

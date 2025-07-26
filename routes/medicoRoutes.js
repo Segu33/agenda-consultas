@@ -22,7 +22,8 @@ router.get('/edit/:id', medicoController.showEditForm);
 router.post('/update/:id', medicoController.update);
 
 // Eliminar médico (usaremos GET para probar más fácil desde navegador)
-router.get('/delete/:id', medicoController.delete);
+router.post('/delete/:id', medicoController.delete);
+
 
 // Asignar especialidad
 router.post('/:id/asignar-especialidad', medicoController.asignarEspecialidad);
