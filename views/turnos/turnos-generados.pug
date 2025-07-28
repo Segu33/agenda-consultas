@@ -1,0 +1,28 @@
+extends ../layout
+
+block content
+  .container
+    h2 Turnos Generados
+
+    if mensaje
+      .alert.alert-success= mensaje
+
+    if turnos.length
+      table.table.table-bordered
+        thead
+          tr
+            th Fecha
+            th Hora
+            th Médico
+            th Paciente
+            th Estado
+        tbody
+          each turno in turnos
+            tr
+              td= turno.fecha
+              td= turno.hora
+              td= turno.Medico ? turno.Medico.nombre : 'Sin médico'
+              td= turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : 'Disponible'
+              td= turno.estado
+    else
+      p No se encontraron turnos generados.

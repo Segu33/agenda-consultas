@@ -3,6 +3,7 @@ const { Turno, Paciente, Medico, Sucursal, Agenda, AgendaCerrada } = require('..
 const { Op } = require('sequelize');
 const moment = require('moment');
 const generarTurnosSemana = require('../utils/generarTurnos');
+const { validarDiaAgenda, generarHorariosDisponibles } = require('../utils/validacionAgenda');
 
 
 // Validar turno contra agenda y cierres
@@ -360,6 +361,57 @@ function generarHorarios(inicio, fin, duracionMin) {
   } catch (error) {
     console.error('Error al generar turnos:', error);
     res.status(500).json({ error: 'Error interno al generar turnos' });
+  }
+};
+  if (!validarDiaAgenda(fecha, agenda)) {
+  return res.status(400).send("El médico no atiende ese día.");
+}
+
+const horarios = generarHorariosDisponibles(
+  agenda.hora_inicio,
+  agenda.hora_fin,
+  agenda.duracion_turno
+);
+xports.generarTurnosDesdeWeb = async (req, res) => {
+  const { id_agenda, fecha_inicio } = req.body;
+
+  try {
+    const resultado = await generarTurnosAutomaticos(id_agenda, fecha_inicio);
+
+    if (resultado.error) {
+      const agendas = await Agenda.findAll({ include: Medico });
+      return res.render('turnos/generar-turnos', {
+        agendas,
+        mensaje: null,
+        error: resultado.error
+      });
+    }
+
+    // Buscar los turnos recién generados
+    const turnosGenerados = await Turno.findAll({
+      where: {
+        id_agenda,
+        fecha: {
+          [Op.gte]: fecha_inicio
+        }
+      },
+      include: ['Medico', 'Paciente', 'Sucursal'], // según tus relaciones
+      order: [['fecha', 'ASC'], ['hora', 'ASC']]
+    });
+
+    return res.render('turnos/turnos-generados', {
+      turnos: turnosGenerados,
+      mensaje: resultado.mensaje
+    });
+
+  } catch (error) {
+    console.error('Error al generar turnos:', error);
+    const agendas = await Agenda.findAll({ include: Medico });
+    res.render('turnos/generar-turnos', {
+      agendas,
+      mensaje: null,
+      error: 'Ocurrió un error inesperado.'
+    });
   }
 };
 

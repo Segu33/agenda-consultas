@@ -16,6 +16,7 @@ const pacienteRoutes = require('./routes/pacienteRoutes');
 const turnoRoutes = require('./routes/turnoRoutes');
 const agendaCerradaRoutes = require('./routes/agendaCerradaRoutes');
 const especialidadRoutes = require('./routes/especialidadRoutes.js');
+const adminRoutes = require('./routes/adminRoutes');
 const obrasSocialesRoutes = require('./routes/obrasSocialesRoutes');
 const horariosRoutes = require('./routes/horariosRoutes');
 const contactoRoutes = require('./routes/contactoRoutes');
@@ -86,5 +87,5 @@ app.use('/', especialidadRoutes);
 app.use('/', obrasSocialesRoutes);
 app.use('/Horarios', horariosRoutes);
 app.use('/', contactoRoutes);
-
+app.use('/admin', adminRoutes);
 module.exports = app;

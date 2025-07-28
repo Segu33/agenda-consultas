@@ -1,6 +1,6 @@
 // controllers/agendaController.js
 const Agenda = require('../models/Agenda');
-const AgendaCerrada = require('../models/agendaCerrada'); // Usa AgendaCerrada en lugar de BloqueoAgenda
+const AgendaCerrada = require('../models/AgendaCerrada'); // Usa AgendaCerrada en lugar de BloqueoAgenda
 
 // Crear una nueva agenda
 exports.createAgenda = async (req, res) => {
