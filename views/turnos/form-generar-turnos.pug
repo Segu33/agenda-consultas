@@ -1,0 +1,25 @@
+extends ../layout
+
+block content
+  h2 Generar Turnos Automáticos
+
+  if mensaje
+    div(style="color: green; font-weight: bold;")= mensaje
+
+  if error
+    div(style="color: red; font-weight: bold;")= error
+
+  form(method="POST", action="/turnos/generar-turnos-web")
+    div
+      label(for="id_agenda") Seleccioná una agenda:
+      select(name="id_agenda", required)
+        option(value="") -- Elegí una agenda --
+        each agenda in agendas
+          option(value=agenda.id_agenda)= `Agenda #${agenda.id_agenda} - Dr. ${agenda.Medico?.nombre || 'Sin nombre'}`
+
+    div
+      label(for="fecha_inicio") Fecha de inicio:
+      input(type="date", name="fecha_inicio", required)
+
+    div(style="margin-top: 1em")
+      button(type="submit") Generar Turnos

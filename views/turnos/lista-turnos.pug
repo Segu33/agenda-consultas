@@ -3,26 +3,27 @@ extends ../layout
 block content
   h1 Lista de Turnos
 
-  table(style="width:100%; border-collapse: collapse; margin-top: 20px;")
+  table(style="width:100%; border-collapse: collapse; margin-top: 20px; font-family: Arial, sans-serif;")
     thead
       tr(style="background-color: #007bff; color: white;")
-        th(style="padding: 10px; border: 1px solid #ccc;") Fecha
-        th(style="padding: 10px; border: 1px solid #ccc;") Hora
-        th(style="padding: 10px; border: 1px solid #ccc;") Médico
-        th(style="padding: 10px; border: 1px solid #ccc;") Paciente
-        th(style="padding: 10px; border: 1px solid #ccc;") Estado
-        th(style="padding: 10px; border: 1px solid #ccc;") Sobreturno
-        th(style="padding: 10px; border: 1px solid #ccc;") Acciones
+        th(style="padding: 12px; border: 1px solid #ccc;") Fecha
+        th(style="padding: 12px; border: 1px solid #ccc;") Hora
+        th(style="padding: 12px; border: 1px solid #ccc;") Médico
+        th(style="padding: 12px; border: 1px solid #ccc;") Paciente
+        th(style="padding: 12px; border: 1px solid #ccc;") Estado
+        th(style="padding: 12px; border: 1px solid #ccc;") Sobreturno
+        th(style="padding: 12px; border: 1px solid #ccc;") Acciones
+
     tbody
       each turno in turnos
-        tr
-          td(style="padding: 8px; border: 1px solid #ccc;")= turno.fecha
-          td(style="padding: 8px; border: 1px solid #ccc;")= turno.hora
-          td(style="padding: 8px; border: 1px solid #ccc;")= turno.Medico ? turno.Medico.nombre + ' ' + turno.Medico.apellido : 'Sin asignar'
-          td(style="padding: 8px; border: 1px solid #ccc;")= turno.Paciente ? turno.Paciente.nombre + ' ' + turno.Paciente.apellido : 'Sin asignar'
-          td(style="padding: 8px; border: 1px solid #ccc;")= turno.estado
-          td(style="padding: 8px; border: 1px solid #ccc;")= turno.es_sobreturno ? 'Sí' : 'No'
-          td(style="padding: 8px; border: 1px solid #ccc;")
-            a(href=`/turnos/${turno.id_turno}/editar`, style="margin-right: 10px;") ✏️
+        tr(style="background-color: #f9f9f9; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#e6f7ff'" onmouseout="this.style.backgroundColor='#f9f9f9'")
+          td(style="padding: 10px; border: 1px solid #ccc;")= turno.fecha
+          td(style="padding: 10px; border: 1px solid #ccc;")= turno.hora
+          td(style="padding: 10px; border: 1px solid #ccc;")= turno.Medico ? turno.Medico.nombre + ' ' + turno.Medico.apellido : 'Sin asignar'
+          td(style="padding: 10px; border: 1px solid #ccc;")= turno.Paciente ? turno.Paciente.nombre + ' ' + turno.Paciente.apellido : 'Sin asignar'
+          td(style="padding: 10px; border: 1px solid #ccc; color: #fff; background-color: #{turno.estado === 'reservado' ? '#28a745' : '#ffc107'}")= turno.estado
+          td(style="padding: 10px; border: 1px solid #ccc; color: #{turno.es_sobreturno ? 'red' : 'gray'}")= turno.es_sobreturno ? 'Sí' : 'No'
+          td(style="padding: 10px; border: 1px solid #ccc; text-align: center;")
+            a(href=`/turnos/${turno.id_turno}/editar`, style="margin-right: 12px; color: #007bff; text-decoration: none; font-size: 18px;") 📝
             form(action=`/turnos/${turno.id_turno}?_method=DELETE`, method="POST", style="display:inline;")
-              button(type="submit", onclick="return confirm('¿Estás seguro de eliminar este turno?')") 🗑️
+              button(type="submit", onclick="return confirm('¿Estás seguro de eliminar este turno?')", style="background: none; border: none; font-size: 18px; color: red; cursor: pointer;") 🗑️

@@ -2,6 +2,8 @@ const { validationResult } = require('express-validator');
 const { Turno, Paciente, Medico, Sucursal, Agenda, AgendaCerrada } = require('../models');
 const { Op } = require('sequelize');
 const moment = require('moment');
+const generarTurnosSemana = require('../utils/generarTurnos');
+
 
 // Validar turno contra agenda y cierres
 async function validarTurnoContraAgenda(id_medico, fecha, hora) {
@@ -37,6 +39,29 @@ async function validarTurnoContraAgenda(id_medico, fecha, hora) {
 
   return { valido: true, agenda: agendaValida };
 }
+// NUEVO: Generar turnos automáticamente para una semana (solo admin)
+exports.generarTurnosAutomaticos = async (req, res) => {
+  const { id_medico } = req.body;
+
+  try {
+    const agenda = await Agenda.findOne({ where: { id_medico } });
+    if (!agenda) return res.status(404).json({ error: 'Agenda no encontrada' });
+
+    // Usar la semana actual como base
+    const fechaInicio = moment().startOf('isoWeek').format('YYYY-MM-DD');
+
+    const turnosGenerados = await generarTurnosSemana(agenda, fechaInicio);
+
+    res.json({
+      mensaje: 'Turnos generados correctamente',
+      cantidad: turnosGenerados.length
+    });
+  } catch (error) {
+    console.error('Error al generar turnos automáticos:', error);
+    res.status(500).json({ error: 'Error al generar turnos automáticos' });
+  }
+};
+
 
 // Mostrar todos los turnos (usuarios autenticados)
 exports.mostrarVistaTurnos = async (req, res) => {
@@ -318,6 +343,25 @@ function generarHorarios(inicio, fin, duracionMin) {
       m = m % 60;
     }
   }
+  exports.generarTurnosAutomaticos = async (req, res) => {
+  const { id_agenda, fecha_inicio } = req.body;
+
+  try {
+    const agenda = await Agenda.findByPk(id_agenda);
+    if (!agenda) {
+      return res.status(404).json({ error: 'Agenda no encontrada' });
+    }
+
+    const turnosGenerados = await generarTurnosSemana(agenda, fecha_inicio);
+    res.status(200).json({
+      mensaje: 'Turnos generados correctamente',
+      cantidad: turnosGenerados.length
+    });
+  } catch (error) {
+    console.error('Error al generar turnos:', error);
+    res.status(500).json({ error: 'Error interno al generar turnos' });
+  }
+};
 
   return result;
 }

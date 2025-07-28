@@ -35,7 +35,11 @@ const Agenda = sequelize.define('Agenda', {
         allowNull: false
     }
 }, {
+    tableName: 'agendas',
+    freezeTableName: true,
     timestamps: false
 });
+
+Agenda.belongsTo(Medico, { foreignKey: 'id_medico' });
 
 module.exports = Agenda;

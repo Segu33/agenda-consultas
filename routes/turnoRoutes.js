@@ -6,7 +6,7 @@ const turnoController = require('../controllers/turnoController');
 const Medico = require('../models/Medico');
 const Paciente = require('../models/Paciente');
 const Sucursal = require('../models/Sucursal');
-// ✅ Middlewares de autorización
+const Agenda = require('../models/Agenda');
 const { verificarAdmin, verificarUsuario } = require('../middlewares/roles');
 
 // ------------------------
@@ -102,5 +102,46 @@ router.delete('/:id', verificarAdmin, turnoController.delete);
 // ------------------------
 
 router.get('/disponibles', verificarUsuario, turnoController.obtenerHorariosDisponibles);
+router.post('/generar-turnos', verificarAdmin, turnoController.generarTurnosAutomaticos);
+// Formulario web para generar turnos automáticamente (admin)
+router.get('/generar-turnos-web', verificarAdmin, async (req, res) => {
+  try {
+    const agendas = await Agenda.findAll({ include: Medico });
+    res.render('turnos/form-generar-turnos', { agendas, mensaje: null, error: null });
+  } catch (err) {
+    console.error('Error al cargar formulario de generación:', err);
+    res.status(500).send('Error al mostrar formulario de generación de turnos.');
+  }
+});
+
+router.post('/generar-turnos-web', verificarAdmin, async (req, res) => {
+  const { id_agenda, fecha_inicio } = req.body;
+  const generarTurnosSemana = require('../utils/generarTurnos');
+  try {
+    const agenda = await Agenda.findByPk(id_agenda);
+    if (!agenda) throw new Error('Agenda no encontrada');
+
+    const turnos = await generarTurnosSemana(agenda, new Date(fecha_inicio));
+    const agendas = await Agenda.findAll({ include: Medico });
+
+    res.render('turnos/form-generar-turnos', {
+      agendas,
+      mensaje: `✅ Se generaron ${turnos.length} turnos correctamente.`,
+      error: null
+    });
+  } catch (err) {
+    console.error('Error al generar turnos:', err);
+    const agendas = await Agenda.findAll({ include: Medico });
+    res.render('turnos/form-generar-turnos', {
+      agendas,
+      mensaje: null,
+      error: '❌ Error al generar turnos. Verificá los datos.'
+    });
+  }
+});
+
+
+
+
 
 module.exports = router;
