@@ -315,10 +315,11 @@ html(lang="es")
       .detalle-turno li:last-child {
         border-bottom: none;
       }
-            table {
+
+      table {
         width: 100%;
         border-collapse: separate;
-        border-spacing: 0 10px; /* Espacio entre filas */
+        border-spacing: 0 10px;
         text-align: left;
         font-size: 0.95rem;
       }
@@ -358,13 +359,15 @@ html(lang="es")
         display: flex;
         gap: 6px;
       }
-            td.acciones {
-        min-width: 100px; /* Ajustá este valor a tu gusto */
+
+      td.acciones {
+        min-width: 100px;
         display: flex;
         gap: 8px;
         justify-content: flex-start;
         align-items: center;
       }
+
       td a:last-child {
         background-color: #dc3545 !important;
         color: white;
@@ -374,8 +377,6 @@ html(lang="es")
         font-size: 0.85rem;
       }
 
-
-
   body
     .navbar
       .logo
@@ -384,7 +385,14 @@ html(lang="es")
 
       .nav-links
         a(href="/") Inicio
-        a(href="/medicos") Médicos
+
+        .dropdown
+          a(href="/medicos") Médicos ▾
+          ul
+            li: a(href="/medicos") Lista de Médicos
+            li: a(href="/agendas/crear") Crear Agenda
+            li: a(href="/agendas/calendario") Calendario de Agendas
+
         a(href="/pacientes") Pacientes
 
         .dropdown

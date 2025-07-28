@@ -11,6 +11,7 @@ const MedicoEspecialidad = require('./MedicoEspecialidad');
 const UsuarioModel = require('./Usuario');
 const Usuario = UsuarioModel(sequelize, require('sequelize').DataTypes);
 
+
 // Asociaciones
 
 Medico.hasMany(AgendaCerrada, { foreignKey: 'id_medico', onDelete: 'CASCADE' });

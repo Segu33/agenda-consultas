@@ -21,7 +21,7 @@ const obrasSocialesRoutes = require('./routes/obrasSocialesRoutes');
 const horariosRoutes = require('./routes/horariosRoutes');
 const contactoRoutes = require('./routes/contactoRoutes');
 const authRoutes = require('./routes/authRoutes'); // ➤ Rutas de autenticación
-
+const agendaRoutes = require('./routes/agendaRoutes');
 // Configurar Pug como motor de plantillas
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -88,4 +88,5 @@ app.use('/', obrasSocialesRoutes);
 app.use('/Horarios', horariosRoutes);
 app.use('/', contactoRoutes);
 app.use('/admin', adminRoutes);
+app.use('/agendas', agendaRoutes);
 module.exports = app;

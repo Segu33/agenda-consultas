@@ -1,0 +1,55 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    h2.mb-4 Crear Agenda Médica
+
+    if mensaje
+      .alert.alert-success= mensaje
+
+    if error
+      .alert.alert-danger= error
+
+    form(method="POST", action="/agendas/crear")
+      .form-group.mb-3
+        label(for="id_medico") Médico:
+        select.form-control(name="id_medico", required)
+          option(value="") -- Seleccione un médico --
+          each medico in medicos
+            option(value=medico.id_medico)= medico.nombre
+
+      .form-group.mb-3
+        label(for="id_sucursal") Sucursal:
+        select.form-control(name="id_sucursal", required)
+          option(value="") -- Seleccione una sucursal --
+          each sucursal in sucursales
+            option(value=sucursal.id_sucursal)= sucursal.nombre
+
+      .form-group.mb-3
+        label(for="dia_semana") Día de la semana:
+        select.form-control(name="dia_semana", required)
+          option(value="") -- Seleccione un día --
+          option(value="lunes") Lunes
+          option(value="martes") Martes
+          option(value="miercoles") Miércoles
+          option(value="jueves") Jueves
+          option(value="viernes") Viernes
+          option(value="sabado") Sábado
+
+      .form-group.mb-3
+        label(for="hora_inicio") Hora de inicio:
+        input.form-control(type="time", name="hora_inicio", required)
+
+      .form-group.mb-3
+        label(for="hora_fin") Hora de fin:
+        input.form-control(type="time", name="hora_fin", required)
+
+      .form-group.mb-3
+        label(for="duracion_turno") Duración por turno (minutos):
+        input.form-control(type="number", name="duracion_turno", min="5", step="5", required)
+
+      .form-group.mb-4
+        label(for="fecha_fin") Repetir hasta (fecha):
+        input.form-control(type="date", name="fecha_fin", required)
+
+      button.btn.btn-primary(type="submit") Crear Agenda
