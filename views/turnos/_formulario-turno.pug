@@ -44,53 +44,69 @@ if conEstilos
       text-align: center;
     }
 
-form(action="/turnos" method="POST")
-  label(for="fecha") Fecha:
-  input(type="date" id="fecha" name="fecha" required value=(datos ? datos.fecha : ''))
+.container
+  form(action="/turnos", method="POST")
+    label(for="fecha") Fecha:
+    input(type="date", id="fecha", name="fecha", required, value=(datos ? datos.fecha : ''))
 
-  if horarioInteractivo
-    label(for="selectHorario") Horario:
-    select(id="selectHorario" name="hora" required)
-      option(value="" disabled selected) -- Seleccione un horario --
-  else
-    label(for="hora") Hora:
-    input(type="time" name="hora" required value=(datos ? datos.hora : ''))
+    if horarioInteractivo
+      label(for="selectHorario") Horario:
+      select(id="selectHorario", name="hora", required)
+        option(value="" disabled selected) -- Seleccione un horario --
+        if horarios
+          each h in horarios
+            option(value=h)= h
+    else
+      label(for="hora") Hora:
+      input(type="time", name="hora", required, value=(datos ? datos.hora : ''))
 
-  label(for="id_medico") Médico:
-  select(id="selectMedico" name="id_medico" required)
-    option(value="" disabled selected) -- Seleccione un médico --
-    each medico in medicos
-      option(
-        value=medico.id_medico,
-        selected=(datos && datos.id_medico == medico.id_medico)
-      ) #{medico.nombre} #{medico.apellido}
+    label(for="id_medico") Médico:
+    select(id="selectMedico", name="id_medico", required)
+      option(value="" disabled selected) -- Seleccione un médico --
+      each medico in medicos
+        option(
+          value=medico.id_medico,
+          selected=(datos && datos.id_medico == medico.id_medico)
+        ) #{medico.nombre} #{medico.apellido}
 
-  label(for="id_paciente") Paciente:
-  select(id="selectPaciente" name="id_paciente" required)
-    option(value="" disabled selected) -- Seleccione un paciente --
-    each paciente in pacientes
-      option(
-        value=paciente.id_paciente,
-        selected=(datos && datos.id_paciente == paciente.id_paciente)
-      ) #{paciente.nombre} #{paciente.apellido}
+    label(for="id_paciente") Paciente:
+    select(id="selectPaciente", name="id_paciente", required)
+      option(value="" disabled selected) -- Seleccione un paciente --
+      each paciente in pacientes
+        option(
+          value=paciente.id_paciente,
+          selected=(datos && datos.id_paciente == paciente.id_paciente)
+        ) #{paciente.nombre} #{paciente.apellido}
 
-  label(for="id_sucursal") Sucursal:
-  select(id="selectSucursal" name="id_sucursal" required)
-    option(value="" disabled selected) -- Seleccione una sucursal --
-    each sucursal in sucursales
-      option(
-        value=sucursal.id_sucursal,
-        selected=(datos && datos.id_sucursal == sucursal.id_sucursal)
-      ) #{sucursal.nombre}
+    label(for="id_sucursal") Sucursal:
+    select(id="selectSucursal", name="id_sucursal", required)
+      option(value="" disabled selected) -- Seleccione una sucursal --
+      each sucursal in sucursales
+        option(
+          value=sucursal.id_sucursal,
+          selected=(datos && datos.id_sucursal == sucursal.id_sucursal)
+        ) #{sucursal.nombre}
 
-  label(for="motivo_consulta") Motivo de Consulta:
-  input(type="text" name="motivo_consulta" required value=(datos ? datos.motivo_consulta : ''))
+    label(for="motivo_consulta") Motivo de Consulta:
+    input(type="text", name="motivo_consulta", required, value=(datos ? datos.motivo_consulta : ''))
 
-  label(for="obra_social") Obra Social:
-  input(type="text" name="obra_social" required value=(datos ? datos.obra_social : ''))
+    label(for="obra_social") Obra Social:
+    input(type="text", name="obra_social", required, value=(datos ? datos.obra_social : ''))
 
-  label(for="sobreturno")
-    input(type="checkbox" name="sobreturno" id="sobreturno" checked=(datos && datos.sobreturno == 'on'))
-    | Sobreturno
+    // Siempre enviar sobreturno false si no está tildado
+    input(type="hidden", name="sobreturno", value="false")
 
-  button(type="submit") Confirmar Turno
+    label(for="sobreturno")
+      input(
+        type="checkbox",
+        name="sobreturno",
+        id="sobreturno",
+        value="true",
+        checked=(datos && (datos.sobreturno === true || datos.sobreturno === 'true' || datos.sobreturno === 'on'))
+      )
+      | Sobreturno
+
+    button(type="submit") Confirmar Turno
+
+  if error
+    .error #{error}

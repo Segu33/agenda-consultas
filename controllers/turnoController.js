@@ -2,11 +2,27 @@ const { validationResult } = require('express-validator');
 const { Turno, Paciente, Medico, Sucursal, Agenda, AgendaCerrada } = require('../models');
 const { Op } = require('sequelize');
 const moment = require('moment');
-const generarTurnosSemana = require('../utils/generarTurnos');
+moment.locale('es');
+const generarTurnosSemana = require('../utils/generarTurnosSemana');
 const { validarDiaAgenda, generarHorariosDisponibles } = require('../utils/validacionAgenda');
 
+function generarHorarios(inicio, fin, duracionMin) {
+  const result = [];
+  let [h, m] = inicio.split(':').map(Number);
+  const [fh, fm] = fin.split(':').map(Number);
 
-// Validar turno contra agenda y cierres
+  while (h < fh || (h === fh && m < fm)) {
+    const horaStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:00`;
+    result.push(horaStr);
+    m += duracionMin;
+    if (m >= 60) {
+      h += Math.floor(m / 60);
+      m = m % 60;
+    }
+  }
+  return result;
+}
+
 async function validarTurnoContraAgenda(id_medico, fecha, hora) {
   const diaSemana = moment(fecha).format('dddd').toLowerCase();
 
@@ -21,7 +37,9 @@ async function validarTurnoContraAgenda(id_medico, fecha, hora) {
     return { valido: false, motivo: 'El médico no atiende ese día' };
   }
 
-  const agendaValida = agendas.find(agenda => hora >= agenda.hora_inicio && hora <= agenda.hora_fin);
+  const agendaValida = agendas.find(
+    agenda => hora >= agenda.hora_inicio && hora < agenda.hora_fin
+  );
 
   if (!agendaValida) {
     return { valido: false, motivo: 'La hora está fuera del horario de atención' };
@@ -30,7 +48,8 @@ async function validarTurnoContraAgenda(id_medico, fecha, hora) {
   const cierre = await AgendaCerrada.findOne({
     where: {
       id_medico,
-      fecha
+      fecha_inicio: { [Op.lte]: fecha },
+      fecha_fin: { [Op.gte]: fecha }
     }
   });
 
@@ -40,31 +59,28 @@ async function validarTurnoContraAgenda(id_medico, fecha, hora) {
 
   return { valido: true, agenda: agendaValida };
 }
-// NUEVO: Generar turnos automáticamente para una semana (solo admin)
-exports.generarTurnosAutomaticos = async (req, res) => {
-  const { id_medico } = req.body;
 
+
+// ================ CONTROLADORES =======================
+
+exports.getAll = async (req, res) => {
   try {
-    const agenda = await Agenda.findOne({ where: { id_medico } });
-    if (!agenda) return res.status(404).json({ error: 'Agenda no encontrada' });
-
-    // Usar la semana actual como base
-    const fechaInicio = moment().startOf('isoWeek').format('YYYY-MM-DD');
-
-    const turnosGenerados = await generarTurnosSemana(agenda, fechaInicio);
-
-    res.json({
-      mensaje: 'Turnos generados correctamente',
-      cantidad: turnosGenerados.length
-    });
+    const turnos = await Turno.findAll();
+    res.json(turnos);
   } catch (error) {
-    console.error('Error al generar turnos automáticos:', error);
-    res.status(500).json({ error: 'Error al generar turnos automáticos' });
+    res.status(500).json({ error: 'Error al obtener turnos' });
   }
 };
 
+exports.getById = async (req, res) => {
+  try {
+    const turno = await Turno.findByPk(req.params.id);
+    turno ? res.json(turno) : res.status(404).json({ error: 'Turno no encontrado' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el turno' });
+  }
+};
 
-// Mostrar todos los turnos (usuarios autenticados)
 exports.mostrarVistaTurnos = async (req, res) => {
   try {
     const turnos = await Turno.findAll({
@@ -79,7 +95,6 @@ exports.mostrarVistaTurnos = async (req, res) => {
   }
 };
 
-// Mostrar formulario para crear turno (solo admin)
 exports.mostrarFormularioCrearTurno = async (req, res) => {
   try {
     const medicos = await Medico.findAll();
@@ -95,16 +110,16 @@ exports.mostrarFormularioCrearTurno = async (req, res) => {
       datos: {}
     });
   } catch (error) {
-    console.error('Error al cargar formulario manual:', error);
     res.status(500).send('Error al mostrar formulario de turnos');
   }
 };
 
-// Crear turno (solo admin)
 exports.create = async (req, res) => {
   try {
     const errores = validationResult(req);
     if (!errores.isEmpty()) {
+      console.log('❌ Errores de validación recibidos:', errores.array());
+
       return res.status(400).render('turnos/turnos', {
         title: 'Crear Turno',
         medicos: await Medico.findAll(),
@@ -116,8 +131,9 @@ exports.create = async (req, res) => {
     }
 
     const { fecha, hora, id_medico, id_paciente, id_sucursal, motivo_consulta, obra_social, sobreturno } = req.body;
+    const sobreturnoChecked = Array.isArray(sobreturno) ? sobreturno.includes('on') : sobreturno === 'on';
 
-    if (sobreturno !== 'on') {
+    if (!sobreturnoChecked) {
       const resultadoValidacion = await validarTurnoContraAgenda(id_medico, fecha, hora);
       if (!resultadoValidacion.valido) {
         return res.status(400).render('turnos/turnos', {
@@ -130,12 +146,26 @@ exports.create = async (req, res) => {
         });
       }
 
+      const horariosDisponibles = await generarHorariosDisponibles(id_medico, fecha);
+
+      if (!horariosDisponibles.includes(hora)) {
+        return res.status(400).render('turnos/turnos', {
+          title: 'Crear Turno',
+          medicos: await Medico.findAll(),
+          pacientes: await Paciente.findAll(),
+          sucursales: await Sucursal.findAll(),
+          error: 'El médico no atiende en ese horario',
+          datos: req.body
+        });
+      }
+
       const turnoExistente = await Turno.findOne({
         where: {
           fecha,
           hora,
           id_medico,
-          es_sobreturno: false
+          es_sobreturno: false,
+          ocupado: true,
         }
       });
 
@@ -154,8 +184,8 @@ exports.create = async (req, res) => {
       motivo_consulta,
       obra_social,
       ocupado: true,
-      es_sobreturno: sobreturno === 'on',
-      id_agenda: sobreturno === 'on' ? null : (await validarTurnoContraAgenda(id_medico, fecha, hora)).agenda.id_agenda
+      es_sobreturno: sobreturnoChecked,
+      id_agenda: sobreturnoChecked ? null : (await validarTurnoContraAgenda(id_medico, fecha, hora)).agenda.id_agenda
     });
 
     res.redirect(`/turnos/${nuevoTurno.id_turno}`);
@@ -165,21 +195,19 @@ exports.create = async (req, res) => {
   }
 };
 
-// Mostrar turno (usuarios autenticados)
 exports.mostrarTurno = async (req, res) => {
   try {
     const turno = await Turno.findByPk(req.params.id, {
       include: [Medico, Paciente, Sucursal]
     });
+
     if (!turno) return res.status(404).send('Turno no encontrado');
     res.render('turnos/turno-generado', { turno });
   } catch (error) {
-    console.error('Error al mostrar turno:', error);
     res.status(500).send('Error interno');
   }
 };
 
-// Confirmar turno desde programación rápida (usuarios autenticados)
 exports.confirmarTurno = async (req, res) => {
   const { fecha, hora, medico_id, sucursal_id, dni, nombre, telefono, sobreturno } = req.body;
   try {
@@ -228,7 +256,6 @@ exports.confirmarTurno = async (req, res) => {
   }
 };
 
-// Actualizar turno (solo admin)
 exports.update = async (req, res) => {
   try {
     const updated = await Turno.update(req.body, {
@@ -240,7 +267,6 @@ exports.update = async (req, res) => {
   }
 };
 
-// Eliminar turno (solo admin)
 exports.delete = async (req, res) => {
   try {
     const deleted = await Turno.destroy({ where: { id_turno: req.params.id } });
@@ -250,31 +276,6 @@ exports.delete = async (req, res) => {
   }
 };
 
-// Obtener todos los turnos (usuarios autenticados)
-exports.getAll = async (req, res) => {
-  try {
-    const turnos = await Turno.findAll();
-    res.json(turnos);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener turnos' });
-  }
-};
-
-exports.getById = async (req, res) => {
-  try {
-    const turno = await Turno.findByPk(req.params.id);
-    turno ? res.json(turno) : res.status(404).json({ error: 'Turno no encontrado' });
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener el turno' });
-  }
-};
-
-// Sobreturno aún no implementado
-exports.crearSobreturno = async (req, res) => {
-  res.send('crearSobreturno aún no implementado.');
-};
-
-// Obtener turnos libres por médico y fecha (usuarios autenticados)
 exports.getAvailable = async (req, res) => {
   const { medico_id, fecha } = req.query;
   try {
@@ -291,19 +292,15 @@ exports.getAvailable = async (req, res) => {
   }
 };
 
-// Obtener horarios disponibles por fecha (usuarios autenticados)
 exports.obtenerHorariosDisponibles = async (req, res) => {
   const { medico_id, fecha } = req.query;
   try {
     const agenda = await Agenda.findOne({ where: { id_medico: medico_id } });
     if (!agenda) return res.json([]);
 
-    const diaSemana = new Date(fecha).getDay();
-    const diasPermitidos = agenda.dias.split(',').map(d => d.trim());
-
-    if (!diasPermitidos.includes(diaSemana.toString())) {
-      return res.json([]);
-    }
+    const diaSemana = moment(fecha).format('dddd').toLowerCase();
+    const diasPermitidos = agenda.dias.split(',').map(d => d.trim().toLowerCase());
+    if (!diasPermitidos.includes(diaSemana)) return res.json([]);
 
     const horaInicio = agenda.hora_inicio;
     const horaFin = agenda.hora_fin;
@@ -318,39 +315,25 @@ exports.obtenerHorariosDisponibles = async (req, res) => {
     });
 
     const horasTomadas = turnosTomados.map(t => t.hora);
-
     const horariosDisponibles = generarHorarios(horaInicio, horaFin, duracion)
       .filter(hora => !horasTomadas.includes(hora));
 
     res.json(horariosDisponibles.map(hora => ({ hora })));
   } catch (error) {
-    console.error('Error al obtener horarios disponibles:', error);
     res.status(500).json([]);
   }
 };
 
-// Generar array de horarios disponibles
-function generarHorarios(inicio, fin, duracionMin) {
-  const result = [];
-  let [h, m] = inicio.split(':').map(Number);
-  const [fh, fm] = fin.split(':').map(Number);
-
-  while (h < fh || (h === fh && m < fm)) {
-    const horaStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:00`;
-    result.push(horaStr);
-    m += duracionMin;
-    if (m >= 60) {
-      h += Math.floor(m / 60);
-      m = m % 60;
-    }
-  }
-  exports.generarTurnosAutomaticos = async (req, res) => {
+exports.generarTurnosAutomaticos = async (req, res) => {
   const { id_agenda, fecha_inicio } = req.body;
-
   try {
     const agenda = await Agenda.findByPk(id_agenda);
     if (!agenda) {
       return res.status(404).json({ error: 'Agenda no encontrada' });
+    }
+
+    if (!validarDiaAgenda(fecha_inicio, agenda)) {
+      return res.status(400).send("El médico no atiende ese día.");
     }
 
     const turnosGenerados = await generarTurnosSemana(agenda, fecha_inicio);
@@ -359,61 +342,42 @@ function generarHorarios(inicio, fin, duracionMin) {
       cantidad: turnosGenerados.length
     });
   } catch (error) {
-    console.error('Error al generar turnos:', error);
     res.status(500).json({ error: 'Error interno al generar turnos' });
   }
 };
-  if (!validarDiaAgenda(fecha, agenda)) {
-  return res.status(400).send("El médico no atiende ese día.");
-}
 
-const horarios = generarHorariosDisponibles(
-  agenda.hora_inicio,
-  agenda.hora_fin,
-  agenda.duracion_turno
-);
-xports.generarTurnosDesdeWeb = async (req, res) => {
+exports.generarTurnosDesdeWeb = async (req, res) => {
   const { id_agenda, fecha_inicio } = req.body;
 
   try {
-    const resultado = await generarTurnosAutomaticos(id_agenda, fecha_inicio);
+    const agenda = await Agenda.findByPk(id_agenda);
+    if (!agenda) throw new Error('Agenda no encontrada');
 
-    if (resultado.error) {
-      const agendas = await Agenda.findAll({ include: Medico });
-      return res.render('turnos/generar-turnos', {
-        agendas,
-        mensaje: null,
-        error: resultado.error
-      });
-    }
+    const turnosGenerados = await generarTurnosSemana(agenda, fecha_inicio);
 
-    // Buscar los turnos recién generados
-    const turnosGenerados = await Turno.findAll({
+    const turnos = await Turno.findAll({
       where: {
         id_agenda,
-        fecha: {
-          [Op.gte]: fecha_inicio
-        }
+        fecha: { [Op.gte]: fecha_inicio }
       },
-      include: ['Medico', 'Paciente', 'Sucursal'], // según tus relaciones
+      include: ['Medico', 'Paciente', 'Sucursal'],
       order: [['fecha', 'ASC'], ['hora', 'ASC']]
     });
 
     return res.render('turnos/turnos-generados', {
-      turnos: turnosGenerados,
-      mensaje: resultado.mensaje
+      turnos,
+      mensaje: 'Turnos generados correctamente'
     });
-
   } catch (error) {
-    console.error('Error al generar turnos:', error);
     const agendas = await Agenda.findAll({ include: Medico });
     res.render('turnos/generar-turnos', {
       agendas,
       mensaje: null,
-      error: 'Ocurrió un error inesperado.'
+      error: error.message || 'Ocurrió un error inesperado.'
     });
   }
 };
 
-  return result;
-}
+exports.crearSobreturno = async (req, res) => {
+  res.send('crearSobreturno aún no implementado.');
+};

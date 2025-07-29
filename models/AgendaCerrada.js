@@ -46,11 +46,11 @@ const AgendaCerrada = sequelize.define('AgendaCerrada', {
     allowNull: true
   }
 }, {
-  tableName: 'AgendaCerrada',
+  tableName: 'agenda_cerrada',
   timestamps: false
 });
 
-// Relaciones (si no las definiste aún)
+// Relaciones
 Medico.hasMany(AgendaCerrada, { foreignKey: 'id_medico' });
 Agenda.hasMany(AgendaCerrada, { foreignKey: 'id_agenda' });
 

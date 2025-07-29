@@ -1,4 +1,3 @@
-// models/Turno.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configdb');
 
@@ -7,6 +6,26 @@ const Turno = sequelize.define('Turno', {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
+  },
+  id_paciente: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  id_sucursal: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  id_medico: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  id_agenda: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'agendas',
+      key: 'id_agenda'
+    }
   },
   fecha: {
     type: DataTypes.DATEONLY,
