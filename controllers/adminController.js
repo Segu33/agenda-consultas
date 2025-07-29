@@ -1,5 +1,5 @@
 const { Agenda } = require('../models');
-const generarTurnosSemana = require('../utils/generarTurnos'); // ajusta el path si es diferente
+const generarTurnosSemana = require('../utils/generarTurnosSemana'); // ajusta el path si es diferente
 
 exports.generarTurnosDesdeAgenda = async (req, res) => {
   try {
@@ -15,7 +15,7 @@ exports.generarTurnosDesdeAgenda = async (req, res) => {
       return res.status(404).json({ error: 'Agenda no encontrada' });
     }
 
-    const turnos = await generarTurnos(agenda, fecha_inicio);
+    const turnos = await generarTurnosSemana(agenda, fecha_inicio);
 
     return res.status(200).json({
       mensaje: 'Turnos generados correctamente',
