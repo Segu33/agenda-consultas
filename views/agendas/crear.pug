@@ -17,6 +17,12 @@ block content
           option(value="") -- Seleccione un médico --
           each medico in medicos
             option(value=medico.id_medico)= medico.nombre
+      .form-group.mb-3
+        label(for="id_especialidad") Especialidad:
+        select.form-control(name="id_especialidad", required)
+          option(value="") -- Seleccione una especialidad --
+          each especialidad in especialidades
+            option(value=especialidad.id_especialidad)= especialidad.nombre
 
       .form-group.mb-3
         label(for="id_sucursal") Sucursal:

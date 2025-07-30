@@ -2,6 +2,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configdb');
 const Medico = require('./Medico');
+const Especialidad = require('./Especialidad');
 
 const Agenda = sequelize.define('Agenda', {
   id_agenda: {
@@ -13,6 +14,14 @@ const Agenda = sequelize.define('Agenda', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: { model: Medico, key: 'id_medico' }
+  },
+  id_especialidad: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Especialidad,
+      key: 'id_especialidad'
+    }
   },
   nombre: {
     type: DataTypes.STRING,
@@ -26,16 +35,15 @@ const Agenda = sequelize.define('Agenda', {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
-    esDiaValido(value) {
-  const diasValidos = ['lunes', 'martes', 'miércoles', 'miercoles', 'jueves', 'viernes', 'sábado', 'sabado', 'domingo', 'domingo'];
-  const ingresados = value.split(',').map(d => d.trim().toLowerCase());
-
-  for (let dia of ingresados) {
-    if (!diasValidos.includes(dia)) {
-      throw new Error(`Día inválido en la agenda: "${dia}". Solo se permiten: lunes, martes, miércoles, jueves, viernes, sábado, domingo`);
-       }
-      }  
-     }  
+      esDiaValido(value) {
+        const diasValidos = ['lunes', 'martes', 'miércoles', 'miercoles', 'jueves', 'viernes', 'sábado', 'sabado', 'domingo'];
+        const ingresados = value.split(',').map(d => d.trim().toLowerCase());
+        for (let dia of ingresados) {
+          if (!diasValidos.includes(dia)) {
+            throw new Error(`Día inválido en la agenda: "${dia}". Solo se permiten: lunes, martes, miércoles, jueves, viernes, sábado, domingo`);
+          }
+        }
+      }
     }
   },
   hora_inicio: {
@@ -53,5 +61,6 @@ const Agenda = sequelize.define('Agenda', {
 });
 
 Agenda.belongsTo(Medico, { foreignKey: 'id_medico' });
+Agenda.belongsTo(Especialidad, { foreignKey: 'id_especialidad' });
 
 module.exports = Agenda;

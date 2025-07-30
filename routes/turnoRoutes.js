@@ -97,12 +97,16 @@ router.post('/sobreturno', verificarAdmin, turnoController.crearSobreturno);
 router.put('/:id', verificarAdmin, turnoController.update);
 router.delete('/:id', verificarAdmin, turnoController.delete);
 
+// Cambiar estado de un turno (requiere admin)
+router.post('/:id_turno/cambiar-estado', verificarAdmin, turnoController.cambiarEstado);
+
 // ------------------------
 // Horarios disponibles (requiere usuario)
 // ------------------------
 
 router.get('/disponibles', verificarUsuario, turnoController.obtenerHorariosDisponibles);
 router.post('/generar-turnos', verificarAdmin, turnoController.generarTurnosAutomaticos);
+
 // Formulario web para generar turnos automáticamente (admin)
 router.get('/generar-turnos-web', verificarAdmin, async (req, res) => {
   try {
@@ -139,9 +143,5 @@ router.post('/generar-turnos-web', verificarAdmin, async (req, res) => {
     });
   }
 });
-
-
-
-
 
 module.exports = router;

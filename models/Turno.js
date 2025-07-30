@@ -1,3 +1,4 @@
+// models/Turno.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../configdb');
 
@@ -36,8 +37,18 @@ const Turno = sequelize.define('Turno', {
     allowNull: false
   },
   estado: {
-    type: DataTypes.STRING,
-    defaultValue: 'reservado'
+    type: DataTypes.ENUM(
+      'no_disponible',
+      'libre',
+      'reservada',
+      'confirmado',
+      'cancelado',
+      'ausente',
+      'presente',
+      'en_consulta',
+      'atendido'
+    ),
+    defaultValue: 'reservada'
   },
   motivo_consulta: {
     type: DataTypes.STRING,

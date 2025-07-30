@@ -60,6 +60,38 @@ async function validarTurnoContraAgenda(id_medico, fecha, hora) {
   return { valido: true, agenda: agendaValida };
 }
 
+// Cambiar el estado de un turno
+exports.cambiarEstado = async (req, res) => {
+  try {
+    const { id_turno } = req.params;
+    const { nuevo_estado } = req.body;
+
+    const turno = await Turno.findByPk(id_turno);
+    if (!turno) {
+      return res.status(404).json({ error: 'Turno no encontrado' });
+    }
+
+    const estadosPermitidos = [
+      'No disponible', 'Libre', 'Reservada', 'Confirmado',
+      'Cancelado', 'Ausente', 'Presente', 'En consulta', 'Atendido'
+    ];
+
+    if (!estadosPermitidos.includes(nuevo_estado)) {
+      return res.status(400).json({ error: 'Estado no permitido' });
+    }
+
+    turno.estado = nuevo_estado;
+    await turno.save();
+
+    res.redirect('/turnos'); // O donde tengas la lista
+  } catch (error) {
+    console.error('Error al cambiar estado del turno:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+
+
 exports.getAll = async (req, res) => {
   try {
     const turnos = await Turno.findAll();
