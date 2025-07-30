@@ -87,22 +87,52 @@ exports.create = async (req, res) => {
 
 // Actualizar un paciente
 exports.update = async (req, res) => {
-    try {
-        const updated = await Paciente.update(req.body, {
-            where: { id_paciente: req.params.id }
-        });
-        updated[0] ? res.json({ success: 'Paciente actualizado' }) : res.status(404).json({ error: 'Paciente no encontrado' });
-    } catch (error) {
-        res.status(500).json({ error: 'Error al actualizar el paciente' });
+  try {
+    const paciente = await Paciente.findByPk(req.params.id);
+    if (!paciente) {
+      return res.status(404).render('error', { message: 'Paciente no encontrado' });
     }
+
+    await paciente.update(req.body);
+
+    // Renderiza la vista de éxito
+    res.render('pacientes/paciente-actualizado', {
+      title: 'Paciente actualizado'
+    });
+  } catch (error) {
+    console.error('Error al actualizar paciente:', error);
+    res.status(500).render('error', { message: 'Error al actualizar el paciente' });
+  }
 };
+
+
 
 // Eliminar un paciente
 exports.delete = async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Paciente.destroy({ where: { id_paciente: id } });
+    res.render('pacientes/eliminado'); // ✅ Renderiza la vista amigable
+  } catch (error) {
+    console.error('Error al eliminar paciente:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+};
+
+// Renderizar formulario para editar un paciente
+exports.renderEditarPaciente = async (req, res) => {
     try {
-        const deleted = await Paciente.destroy({ where: { id_paciente: req.params.id } });
-        deleted ? res.json({ success: 'Paciente eliminado' }) : res.status(404).json({ error: 'Paciente no encontrado' });
+        const paciente = await Paciente.findByPk(req.params.id);
+        if (!paciente) {
+            return res.status(404).send('Paciente no encontrado');
+        }
+
+        res.render('pacientes/editar-paciente', {
+            title: 'Editar Paciente',
+           paciente
+        });
     } catch (error) {
-        res.status(500).json({ error: 'Error al eliminar el paciente' });
+        console.error('Error al mostrar formulario de edición:', error);
+        res.status(500).send('Error del servidor');
     }
 };

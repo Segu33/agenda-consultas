@@ -1,12 +1,13 @@
 require('dotenv').config();
 const express = require('express');
+const methodOverride = require('method-override');
 const path = require('path');
-const session = require('express-session'); // ➤ Agregado para sesiones
+const session = require('express-session');
 
 const app = express();
 const sequelize = require('./configdb');
 
-// Modelos necesarios para inicio y agendamiento
+// Modelos necesarios
 const Medico = require('./models/Medico');
 const Paciente = require('./models/Paciente');
 
@@ -20,8 +21,9 @@ const adminRoutes = require('./routes/adminRoutes');
 const obrasSocialesRoutes = require('./routes/obrasSocialesRoutes');
 const horariosRoutes = require('./routes/horariosRoutes');
 const contactoRoutes = require('./routes/contactoRoutes');
-const authRoutes = require('./routes/authRoutes'); // ➤ Rutas de autenticación
+const authRoutes = require('./routes/authRoutes');
 const agendaRoutes = require('./routes/agendaRoutes');
+
 // Configurar Pug como motor de plantillas
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -29,29 +31,30 @@ app.set('views', path.join(__dirname, 'views'));
 // Middleware para parsear JSON y datos del formulario
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method')); // debe ir antes de las rutas que usan PUT/DELETE
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ➤ Configuración de sesión
+// Configuración de sesión
 app.use(session({
-    secret: 'clave-secreta-super-segura', // ⚠️ Reemplazar con un valor fuerte en producción
+    secret: 'clave-secreta-super-segura',
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false } // true si usás HTTPS
 }));
 
-// ➤ Middleware para exponer el usuario logueado en todas las vistas
+// Middleware para exponer el usuario logueado en todas las vistas
 app.use((req, res, next) => {
     res.locals.usuario = req.session.usuario || null;
     next();
 });
 
-// ➤ Rutas de autenticación (deben ir antes que las protegidas)
+// Rutas de autenticación (antes que las protegidas)
 app.use(authRoutes);
 
 // Ruta de inicio
 app.get('/', async (req, res) => {
     try {
-        await sequelize.authenticate(); // Prueba la conexión
+        await sequelize.authenticate();
         res.render('index', {
             title: 'Agenda de Consultas Médicas',
             mensaje: 'Conexión exitosa a la base de datos'
@@ -78,7 +81,7 @@ app.get('/agendar-turno', async (req, res) => {
     }
 });
 
-// Configuración de rutas de módulos
+// Rutas de módulos
 app.use('/medicos', medicoRoutes);
 app.use('/pacientes', pacienteRoutes);
 app.use('/turnos', turnoRoutes);
@@ -89,4 +92,5 @@ app.use('/Horarios', horariosRoutes);
 app.use('/', contactoRoutes);
 app.use('/admin', adminRoutes);
 app.use('/agendas', agendaRoutes);
+
 module.exports = app;

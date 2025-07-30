@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const medicoController = require('../controllers/medicoController');
 const Especialidad = require('../models/Especialidad');
+const { verificarAdmin } = require('../middlewares/roles');
+
+// ✅ Proteger todas las rutas
+router.use(verificarAdmin);
 
 // Lista de médicos
 router.get('/', medicoController.getAll);
@@ -21,9 +25,8 @@ router.get('/edit/:id', medicoController.showEditForm);
 // Actualizar médico
 router.post('/update/:id', medicoController.update);
 
-// Eliminar médico (usaremos GET para probar más fácil desde navegador)
+// Eliminar médico
 router.post('/delete/:id', medicoController.delete);
-
 
 // Asignar especialidad
 router.post('/:id/asignar-especialidad', medicoController.asignarEspecialidad);

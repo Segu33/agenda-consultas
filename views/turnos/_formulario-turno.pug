@@ -60,6 +60,13 @@ if conEstilos
       label(for="hora") Hora:
       input(type="time", name="hora", required, value=(datos ? datos.hora : ''))
 
+      if horariosDisponibles && horariosDisponibles.length
+        div.alert.alert-info
+          strong 🕒 Horarios disponibles:
+          ul.mb-0
+            each hora in horariosDisponibles
+              li= hora
+
     label(for="id_medico") Médico:
     select(id="selectMedico", name="id_medico", required)
       option(value="" disabled selected) -- Seleccione un médico --

@@ -1,11 +1,14 @@
-extends ../layouts/layout.pug
+extends ../layout.pug
 
 block content
   .container.mt-5
     .card.shadow.p-4
       h3.mb-4.text-center Editar Paciente
+      p.text-muted ID del paciente: #{paciente.id_paciente}
 
-      form(method="POST", action=`/pacientes/editar/${paciente.id}`)
+      form(method="POST", action=`/pacientes/${paciente.id_paciente}?_method=PUT`)
+        input(type="hidden", name="_method", value="PUT")
+        
         .mb-3
           label.form-label(for="nombre") Nombre
           input.form-control(type="text", name="nombre", id="nombre", value=paciente.nombre, required)
@@ -13,6 +16,10 @@ block content
         .mb-3
           label.form-label(for="apellido") Apellido
           input.form-control(type="text", name="apellido", id="apellido", value=paciente.apellido, required)
+
+        .mb-3
+          label.form-label(for="dni") DNI
+          input.form-control(type="text", name="dni", id="dni", value=paciente.dni, required)
         
         .mb-3
           label.form-label(for="email") Email

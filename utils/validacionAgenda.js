@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const moment = require('moment');
 const Agenda = require('../models/Agenda');
 const AgendaCerrada = require('../models/AgendaCerrada');
 const Turno = require('../models/Turno');
@@ -18,15 +19,11 @@ const diasSemanaMap = {
 
 /**
  * Genera los turnos de una agenda médica para una semana a partir de la fecha indicada
- * @param {Agenda} agenda - Instancia de Agenda con los datos de planificación
- * @param {string} fechaInicio - Fecha base en formato YYYY-MM-DD
- * @returns {Promise<Array>} - Lista de turnos generados
  */
 async function generarTurnosSemana(agenda, fechaInicio) {
   const fechaBase = new Date(fechaInicio);
-  const fechaFinSemana = agregarDias(fechaBase, 6); // semana completa
+  const fechaFinSemana = agregarDias(fechaBase, 6);
 
-  // Buscar fechas bloqueadas (AgendaCerrada)
   const bloqueos = await AgendaCerrada.findAll({
     where: {
       id_agenda: agenda.id_agenda,
@@ -57,7 +54,6 @@ async function generarTurnosSemana(agenda, fechaInicio) {
   const diasHabilitados = agenda.dias.split(',').map(d => d.trim().toLowerCase());
   const turnosGenerados = [];
 
-  // Validar y formatear horas
   const horaInicio = formatearHora(agenda.hora_inicio);
   const horaFin = formatearHora(agenda.hora_fin);
   const duracion = agenda.duracion_turno;
@@ -85,7 +81,6 @@ async function generarTurnosSemana(agenda, fechaInicio) {
         duracion_turno: duracion
       };
 
-      // Verificar si ya existe el turno
       const existe = await Turno.findOne({
         where: {
           id_agenda: turno.id_agenda,
@@ -106,10 +101,59 @@ async function generarTurnosSemana(agenda, fechaInicio) {
   return turnosGenerados;
 }
 
-// =======================
-// Funciones auxiliares
-// =======================
+// ========== VALIDAR SI MÉDICO ATIENDE ESE DÍA ==========
+function validarDiaAgenda(fecha, agenda) {
+  const dia = moment(fecha).format('dddd').toLowerCase();
+  const dias = agenda.dias.toLowerCase().split(',').map(d => d.trim());
+  return dias.includes(dia);
+}
 
+// ========== GENERAR HORARIOS DISPONIBLES PARA UN DÍA ==========
+function generarHorarios(inicio, fin, duracionMin) {
+  const result = [];
+  let [h, m] = inicio.split(':').map(Number);
+  const [fh, fm] = fin.split(':').map(Number);
+
+  while (h < fh || (h === fh && m < fm)) {
+    const horaStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:00`;
+    result.push(horaStr);
+    m += duracionMin;
+    if (m >= 60) {
+      h += Math.floor(m / 60);
+      m = m % 60;
+    }
+  }
+  return result;
+}
+
+async function generarHorariosDisponibles(id_medico, fecha) {
+  const diaSemana = moment(fecha).format('dddd').toLowerCase();
+
+  const agenda = await Agenda.findOne({
+    where: {
+      id_medico,
+      dias: { [Op.like]: `%${diaSemana}%` }
+    }
+  });
+
+  if (!agenda) return [];
+
+  const horarios = generarHorarios(agenda.hora_inicio, agenda.hora_fin, agenda.duracion_turno);
+
+  const turnosTomados = await Turno.findAll({
+    where: {
+      id_medico,
+      fecha,
+      ocupado: true
+    }
+  });
+
+  const horasOcupadas = turnosTomados.map(t => t.hora);
+
+  return horarios.filter(hora => !horasOcupadas.includes(hora));
+}
+
+// ========== FUNCIONES AUXILIARES ==========
 function agregarDias(fecha, dias) {
   const nueva = new Date(fecha);
   nueva.setDate(nueva.getDate() + dias);
@@ -134,4 +178,9 @@ function horaMenor(h1, h2) {
   return h1h < h2h || (h1h === h2h && h1m < h2m);
 }
 
-module.exports = generarTurnosSemana;
+// ========== EXPORTS ==========
+module.exports = {
+  generarTurnosSemana,
+  validarDiaAgenda,
+  generarHorariosDisponibles
+};

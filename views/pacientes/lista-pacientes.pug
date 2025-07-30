@@ -14,6 +14,7 @@ block content
             th ID
             th Nombre
             th Apellido
+            th DNI
             th Email
             th Teléfono
             th Obra Social
@@ -24,11 +25,15 @@ block content
               td= paciente.id_paciente
               td= paciente.nombre
               td= paciente.apellido
+              td= paciente.dni
               td= paciente.email
               td= paciente.telefono
               td= paciente.obra_social
               td
                 a.btn.btn-sm.btn-warning(href=`/pacientes/editar/${paciente.id_paciente}`) ✏️ Editar
-                a.btn.btn-sm.btn-danger.ms-2(href=`/pacientes/eliminar/${paciente.id_paciente}` onclick="return confirm('¿Estás seguro de eliminar este paciente?')") 🗑️ Eliminar
+                form(action=`/pacientes/eliminar/${paciente.id_paciente}`, method='POST', onsubmit="return confirm('¿Estás seguro de eliminar este paciente?')", style="display:inline;")
+                  button.btn.btn-sm.btn-danger.ms-2(type='submit')
+                    i.fas.fa-trash.me-1
+                    | Eliminar
     else
       p.text-center.text-muted.mt-4 No hay pacientes registrados.

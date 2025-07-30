@@ -1,7 +1,10 @@
-// routes/agendaRoutes.js
 const express = require('express');
 const router = express.Router();
 const agendaController = require('../controllers/agendaController');
+const { verificarAdmin } = require('../middlewares/roles');
+
+// ✅ Proteger todas las rutas de agenda
+router.use(verificarAdmin);
 
 // Mostrar formulario para crear agenda
 router.get('/crear', agendaController.mostrarFormularioCrear);

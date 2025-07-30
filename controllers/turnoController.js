@@ -60,9 +60,6 @@ async function validarTurnoContraAgenda(id_medico, fecha, hora) {
   return { valido: true, agenda: agendaValida };
 }
 
-
-// ================ CONTROLADORES =======================
-
 exports.getAll = async (req, res) => {
   try {
     const turnos = await Turno.findAll();
@@ -107,7 +104,8 @@ exports.mostrarFormularioCrearTurno = async (req, res) => {
       pacientes,
       sucursales,
       error: null,
-      datos: {}
+      datos: {},
+      horariosDisponibles: []
     });
   } catch (error) {
     res.status(500).send('Error al mostrar formulario de turnos');
@@ -118,8 +116,6 @@ exports.create = async (req, res) => {
   try {
     const errores = validationResult(req);
     if (!errores.isEmpty()) {
-      console.log('❌ Errores de validación recibidos:', errores.array());
-
       return res.status(400).render('turnos/turnos', {
         title: 'Crear Turno',
         medicos: await Medico.findAll(),
@@ -133,29 +129,20 @@ exports.create = async (req, res) => {
     const { fecha, hora, id_medico, id_paciente, id_sucursal, motivo_consulta, obra_social, sobreturno } = req.body;
     const sobreturnoChecked = Array.isArray(sobreturno) ? sobreturno.includes('on') : sobreturno === 'on';
 
+    const horariosDisponibles = await generarHorariosDisponibles(id_medico, fecha);
+    const horaConSegundos = hora.length === 5 ? `${hora}:00` : hora;
+
     if (!sobreturnoChecked) {
       const resultadoValidacion = await validarTurnoContraAgenda(id_medico, fecha, hora);
-      if (!resultadoValidacion.valido) {
-        return res.status(400).render('turnos/turnos', {
-          title: 'Crear Turno',
-          medicos: await Medico.findAll(),
-          pacientes: await Paciente.findAll(),
-          sucursales: await Sucursal.findAll(),
-          error: resultadoValidacion.motivo,
-          datos: req.body
-        });
-      }
-
-      const horariosDisponibles = await generarHorariosDisponibles(id_medico, fecha);
-
-      if (!horariosDisponibles.includes(hora)) {
+      if (!resultadoValidacion.valido || !horariosDisponibles.includes(horaConSegundos)) {
         return res.status(400).render('turnos/turnos', {
           title: 'Crear Turno',
           medicos: await Medico.findAll(),
           pacientes: await Paciente.findAll(),
           sucursales: await Sucursal.findAll(),
           error: 'El médico no atiende en ese horario',
-          datos: req.body
+          datos: req.body,
+          horariosDisponibles
         });
       }
 
@@ -165,7 +152,7 @@ exports.create = async (req, res) => {
           hora,
           id_medico,
           es_sobreturno: false,
-          ocupado: true,
+          ocupado: true
         }
       });
 
