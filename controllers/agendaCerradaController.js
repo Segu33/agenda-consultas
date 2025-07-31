@@ -1,6 +1,6 @@
 const { AgendaCerrada, Medico, Agenda, Sucursal } = require('../models');
 
-// Obtener todas las agendas cerradas en formato JSON
+
 exports.getAgendaCerrada = async (req, res) => {
   try {
     const agendas = await AgendaCerrada.findAll({
@@ -61,7 +61,7 @@ exports.createAgendaCerrada = async (req, res) => {
 
     const nuevaAgenda = await AgendaCerrada.create({
       id_agenda,
-      id_medico: agenda.id_medico,  // asigno id_medico desde agenda
+      id_medico: agenda.id_medico, 
       fecha_inicio,
       fecha_fin,
       motivo

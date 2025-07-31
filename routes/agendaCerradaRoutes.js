@@ -5,7 +5,7 @@ const methodOverride = require('method-override');
 
 router.use(methodOverride('_method'));
 
-// Página para gestionar agendas cerradas (listado + formulario)
+
 router.get('/gestion', async (req, res) => {
   try {
     const { Agenda, Medico } = require('../models');

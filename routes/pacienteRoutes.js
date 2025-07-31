@@ -3,10 +3,10 @@ const router = express.Router();
 const pacienteController = require('../controllers/pacienteController');
 const { verificarAdmin } = require('../middlewares/roles');
 
-// Aplica el middleware para TODO el router, protege todas las rutas
+
 router.use(verificarAdmin);
 
-// Ahora definís las rutas sin middleware individual porque ya está aplicado arriba
+
 router.get('/', pacienteController.getAll);
 router.get('/agregar', pacienteController.renderAgregarPaciente);
 router.get('/buscar', verificarAdmin, pacienteController.buscarPorDni);

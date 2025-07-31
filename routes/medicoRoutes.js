@@ -16,24 +16,19 @@ router.get('/add', async (req, res) => {
   res.render('medicos/add', { especialidades });
 });
 
-// Crear nuevo médico
+
 router.post('/create', medicoController.create);
 
-// Mostrar formulario de edición
-router.get('/edit/:id', medicoController.showEditForm); // 👈 usa showEditForm
+router.get('/edit/:id', medicoController.showEditForm); 
 
-// Actualizar médico
 router.post('/update/:id', medicoController.update);
 
-// Eliminar médico
 router.post('/delete/:id', medicoController.delete);
 
-// Asignar especialidad
 router.post('/:id/asignar-especialidad', medicoController.asignarEspecialidad);
 
-// Eliminar especialidad
 router.post('/:id/eliminar-especialidad', medicoController.eliminarEspecialidad);
-// Obtener especialidades de un médico (para autocompletar agenda)
+
 router.get('/:id/especialidades', medicoController.obtenerEspecialidades);
 
 module.exports = router;

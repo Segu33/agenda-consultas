@@ -20,8 +20,9 @@ block content
 
       .form-group.mb-3
         label(for="id_especialidad") Especialidad:
-        select.form-control#id_especialidad(name="id_especialidad", required disabled)
+        select.form-control#id_especialidad(name="id_especialidad_display", required disabled)
           option(value="") -- Seleccione una especialidad --
+        input(type="hidden", name="id_especialidad", id="id_especialidad_hidden")
 
       .form-group.mb-3
         label(for="id_sucursal") Sucursal:
@@ -63,12 +64,14 @@ block content
     document.addEventListener('DOMContentLoaded', () => {
       const medicoSelect = document.getElementById('id_medico');
       const especialidadSelect = document.getElementById('id_especialidad');
+      const hiddenInput = document.getElementById('id_especialidad_hidden');
 
       medicoSelect.addEventListener('change', async () => {
         const medicoId = medicoSelect.value;
 
         especialidadSelect.innerHTML = '';
         especialidadSelect.disabled = true;
+        hiddenInput.value = '';
 
         if (!medicoId) {
           especialidadSelect.innerHTML = '<option value="">-- Seleccione una especialidad --</option>';
@@ -83,7 +86,9 @@ block content
             const unica = especialidades[0];
             const option = new Option(unica.nombre, unica.id_especialidad);
             especialidadSelect.add(option);
+            especialidadSelect.value = unica.id_especialidad;
             especialidadSelect.disabled = true;
+            hiddenInput.value = unica.id_especialidad;  // ✅ actualiza hidden
           } else if (especialidades.length > 1) {
             especialidadSelect.add(new Option('-- Seleccione una especialidad --', ''));
             especialidades.forEach(esp => {
@@ -91,6 +96,10 @@ block content
               especialidadSelect.add(option);
             });
             especialidadSelect.disabled = false;
+
+            especialidadSelect.addEventListener('change', () => {
+              hiddenInput.value = especialidadSelect.value;
+            });
           } else {
             especialidadSelect.add(new Option('-- Sin especialidades asignadas --', ''));
             especialidadSelect.disabled = true;

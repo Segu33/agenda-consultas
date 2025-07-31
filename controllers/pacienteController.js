@@ -35,7 +35,7 @@ exports.buscarPorDni = async (req, res) => {
       include: [
         {
           model: Turno,
-          required: false, // Incluye pacientes sin turno
+          required: false, 
           attributes: ['id_turno']
         }
       ]

@@ -170,14 +170,14 @@ exports.obtenerEspecialidades = async (req, res) => {
     const medico = await Medico.findByPk(req.params.id, {
       include: {
         model: Especialidad,
-        as: 'especialidades', // debe coincidir con tu alias
+        as: 'especialidades', 
         through: { attributes: [] }
       }
     });
 
     if (!medico) return res.status(404).json({ error: 'Médico no encontrado' });
 
-    res.json(medico.especialidades); // este alias es correcto en tu caso
+    res.json(medico.especialidades); 
   } catch (error) {
     console.error('Error al obtener especialidades del médico:', error);
     res.status(500).json({ error: 'Error al obtener especialidades' });

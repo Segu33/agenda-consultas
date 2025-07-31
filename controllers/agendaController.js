@@ -3,7 +3,7 @@ const { validationResult } = require('express-validator');
 const moment = require('moment');
 const generarTurnosSemana = require('../utils/generarTurnosSemana');
 
-// Crear una nueva agenda y generar turnos semanales hasta fecha_fin
+
 async function createAgenda(req, res) {
   try {
     const errors = validationResult(req);
@@ -41,7 +41,7 @@ async function createAgenda(req, res) {
 
     while (fechaInicio <= fechaLimite) {
       await generarTurnosSemana(newAgenda, new Date(fechaInicio));
-      fechaInicio.setDate(fechaInicio.getDate() + 7); // avanzar 1 semana
+      fechaInicio.setDate(fechaInicio.getDate() + 7); 
     }
 
     res.redirect('/agendas/calendario');
@@ -99,7 +99,7 @@ async function getAvailableTimes(req, res) {
       return res.status(404).json({ error: 'No se encontró la agenda del médico' });
     }
 
-    // Acá podés reemplazar por una consulta real de turnos
+    
     const horariosEjemplo = [
       { id_turno: 1, hora: '08:00' },
       { id_turno: 2, hora: '08:30' },
@@ -113,9 +113,7 @@ async function getAvailableTimes(req, res) {
   }
 }
 
-// Mostrar calendario de agendas con FullCalendar
-// Mostrar calendario de agendas con FullCalendar
-// Mostrar calendario de agendas con FullCalendar
+
 async function mostrarCalendarioAgendas(req, res) {
   try {
     const { medico, especialidad } = req.query;

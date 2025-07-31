@@ -23,8 +23,8 @@ const Sucursal = sequelize.define('Sucursal', {
     }
   }
 }, {
-  timestamps: false,           // 👈 coma al final de esta línea
-  tableName: 'sucursales'      // 👈 tabla correcta
+  timestamps: false,           
+  tableName: 'sucursales'  
 });
 
 module.exports = Sucursal;

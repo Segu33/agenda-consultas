@@ -83,7 +83,7 @@ exports.cambiarEstado = async (req, res) => {
     turno.estado = nuevo_estado;
     await turno.save();
 
-    res.redirect('/turnos'); // O donde tengas la lista
+    res.redirect('/turnos'); 
   } catch (error) {
     console.error('Error al cambiar estado del turno:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
