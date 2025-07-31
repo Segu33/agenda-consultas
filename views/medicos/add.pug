@@ -5,7 +5,7 @@ block content
 
   style.
     form {
-      max-width: 500px;
+      max-width: 600px;
       margin: 0 auto;
       padding: 20px;
       background-color: #f8f9fa;
@@ -28,7 +28,8 @@ block content
       box-sizing: border-box;
       font-size: 16px;
     }
-    button[type="submit"] {
+    button[type="submit"],
+    .add-button {
       width: 100%;
       padding: 12px;
       background-color: #007bff;
@@ -40,8 +41,26 @@ block content
       cursor: pointer;
       transition: background-color 0.3s;
     }
-    button[type="submit"]:hover {
+    button[type="submit"]:hover,
+    .add-button:hover {
       background-color: #0056b3;
+    }
+    .especialidad-item {
+      margin-bottom: 10px;
+      background-color: #e9ecef;
+      padding: 10px;
+      border-radius: 5px;
+      position: relative;
+    }
+    .remove-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: #dc3545;
+      font-size: 18px;
+      cursor: pointer;
     }
 
   form(action='/medicos/create', method="post")
@@ -60,16 +79,33 @@ block content
     label Teléfono:
     input(type="text", name="telefono")
 
-    label(for="estado") Estado:
-      select(name="estado" id="estado" required)
-        option(value="" disabled selected) Selecciona una opción
-        option(value="1") Activo
-        option(value="0") Inactivo
+    label Estado:
+    select(name="estado" required)
+      option(value="" disabled selected) Selecciona una opción
+      option(value="1") Activo
+      option(value="0") Inactivo
 
-    label Especialidad:
-      select(name="id_especialidad", required)
-        option(value='') -- Seleccionar Especialidad --
-        each especialidad in especialidades
-          option(value=especialidad.id_especialidad)= especialidad.nombre
+    label Especialidades y Matrículas:
+    #especialidades-container
+
+    button(type="button", class="add-button", onclick="agregarEspecialidad()") ➕ Agregar especialidad
 
     button(type="submit") Guardar
+
+  script.
+    const especialidades = !{JSON.stringify(especialidades)};
+
+    function agregarEspecialidad() {
+      const container = document.getElementById('especialidades-container');
+      const div = document.createElement('div');
+      div.className = 'especialidad-item';
+      div.innerHTML = `
+        <select name="id_especialidad[]" required>
+          <option value="">-- Seleccionar Especialidad --</option>
+          ${especialidades.map(e => `<option value="${e.id_especialidad}">${e.nombre}</option>`).join('')}
+        </select>
+        <input type="text" name="matricula[]" placeholder="Matrícula habilitante" required />
+        <button type="button" class="remove-button" onclick="this.parentNode.remove()">×</button>
+      `;
+      container.appendChild(div);
+    }

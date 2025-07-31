@@ -4,9 +4,19 @@ block content
   .container-fluid.mt-5.px-5
     h2.text-center.mb-4 Lista de Pacientes
 
-    a(href="/pacientes/agregar", class="btn btn-primary mb-3 me-2") 🩺 Agregar Paciente
-    a(href="/", class="btn btn-secondary mb-3") ⬅ Volver al Inicio
+    // Botones principales
+    a.btn.btn-primary.mb-3.me-2(href="/pacientes/agregar") 🩺 Agregar Paciente
+    a.btn.btn-secondary.mb-3(href="/") ⬅ Volver al Inicio
 
+    // 🔍 Buscador por DNI con autocompletar
+    form.mb-4
+      .input-group
+        input#busquedaDni.form-control(type="text" placeholder="Buscar paciente por DNI..." autocomplete="off")
+        button.btn.btn-outline-secondary(type="button" onclick="buscarPacienteSeleccionado()") Buscar
+
+    ul#resultadosBusqueda.list-group.mb-4(style="max-height: 200px; overflow-y: auto;")
+
+    // Tabla de pacientes
     if pacientes.length
       table.table.table-striped
         thead
@@ -37,3 +47,60 @@ block content
                     | Eliminar
     else
       p.text-center.text-muted.mt-4 No hay pacientes registrados.
+
+  // Scripts para autocompletado y redirección según turno
+  script.
+    let pacientesEncontrados = [];
+
+    document.getElementById('busquedaDni').addEventListener('input', async function () {
+      const term = this.value.trim();
+      const lista = document.getElementById('resultadosBusqueda');
+      lista.innerHTML = '';
+
+      if (term.length < 2) return;
+
+      try {
+        const res = await fetch(`/pacientes/buscar?term=${encodeURIComponent(term)}`);
+        const data = await res.json();
+        pacientesEncontrados = data;
+
+        data.forEach(p => {
+          const li = document.createElement('li');
+          li.classList.add('list-group-item', 'list-group-item-action');
+
+          let texto = `${p.nombre} ${p.apellido} - DNI: ${p.dni}`;
+          texto += p.tieneTurno ? ' ✅ Tiene turno' : ' ❌ Sin turno';
+
+          li.textContent = texto;
+          li.dataset.id = p.id_paciente;
+
+          li.addEventListener('click', () => {
+            if (p.tieneTurno && p.id_turno) {
+              window.location.href = `/turnos/${p.id_turno}`;
+            } else {
+              window.location.href = `/pacientes/editar/${p.id_paciente}`;
+            }
+          });
+
+          lista.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Error en búsqueda por DNI:', error);
+      }
+    });
+
+    function buscarPacienteSeleccionado() {
+      const input = document.getElementById('busquedaDni').value.trim();
+      const seleccionado = pacientesEncontrados.find(p =>
+        `${p.nombre} ${p.apellido} - DNI: ${p.dni}`.toLowerCase().includes(input.toLowerCase())
+      );
+      if (seleccionado) {
+        if (seleccionado.tieneTurno && seleccionado.id_turno) {
+          window.location.href = `/turnos/${seleccionado.id_turno}`;
+        } else {
+          window.location.href = `/pacientes/editar/${seleccionado.id_paciente}`;
+        }
+      } else {
+        alert('Paciente no encontrado o ingrese un DNI válido.');
+      }
+    }

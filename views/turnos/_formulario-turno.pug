@@ -73,6 +73,7 @@ if conEstilos
       each medico in medicos
         option(
           value=medico.id_medico,
+          data-especialidad=medico.Especialidad ? medico.Especialidad.nombre : '',
           selected=(datos && datos.id_medico == medico.id_medico)
         ) #{medico.nombre} #{medico.apellido}
 
@@ -82,6 +83,7 @@ if conEstilos
       each paciente in pacientes
         option(
           value=paciente.id_paciente,
+          data-obra-social=paciente.obra_social || '',
           selected=(datos && datos.id_paciente == paciente.id_paciente)
         ) #{paciente.nombre} #{paciente.apellido}
 
@@ -95,10 +97,10 @@ if conEstilos
         ) #{sucursal.nombre}
 
     label(for="motivo_consulta") Motivo de Consulta:
-    input(type="text", name="motivo_consulta", required, value=(datos ? datos.motivo_consulta : ''))
+    input(type="text", id="motivo_consulta", name="motivo_consulta", required, value=(datos ? datos.motivo_consulta : ''))
 
     label(for="obra_social") Obra Social:
-    input(type="text", name="obra_social", required, value=(datos ? datos.obra_social : ''))
+    input(type="text", id="obra_social", name="obra_social", required, value=(datos ? datos.obra_social : ''))
 
     // Siempre enviar sobreturno false si no está tildado
     input(type="hidden", name="sobreturno", value="false")
@@ -117,3 +119,26 @@ if conEstilos
 
   if error
     .error #{error}
+
+  script.
+    // Autocompletar motivo_consulta con especialidad al elegir médico
+    const selectMedico = document.getElementById('selectMedico');
+    const motivoInput = document.getElementById('motivo_consulta');
+    selectMedico.addEventListener('change', () => {
+      const selectedOption = selectMedico.options[selectMedico.selectedIndex];
+      const especialidad = selectedOption.getAttribute('data-especialidad') || '';
+      if (especialidad) {
+        motivoInput.value = especialidad;
+      }
+    });
+
+    // Autocompletar obra_social con la obra social del paciente
+    const selectPaciente = document.getElementById('selectPaciente');
+    const obraSocialInput = document.getElementById('obra_social');
+    selectPaciente.addEventListener('change', () => {
+      const selectedOption = selectPaciente.options[selectPaciente.selectedIndex];
+      const obraSocial = selectedOption.getAttribute('data-obra-social') || '';
+      if (obraSocial) {
+        obraSocialInput.value = obraSocial;
+      }
+    });

@@ -1,5 +1,5 @@
 const sequelize = require('../configdb');
-const { DataTypes } = require('sequelize'); // 👈 NECESARIO
+
 const Medico = require('./Medico');
 const Paciente = require('./Paciente');
 const Sucursal = require('./Sucursal');
@@ -8,11 +8,9 @@ const AgendaCerrada = require('./AgendaCerrada');
 const Turno = require('./Turno');
 const Especialidad = require('./Especialidad');
 const MedicoEspecialidad = require('./MedicoEspecialidad');
-const UsuarioModel = require('./Usuario');
-const Usuario = UsuarioModel(sequelize, require('sequelize').DataTypes);
+const Usuario = require('./Usuario');
 
-
-// Asociaciones
+// Definir asociaciones
 
 Medico.hasMany(AgendaCerrada, { foreignKey: 'id_medico', onDelete: 'CASCADE' });
 AgendaCerrada.belongsTo(Medico, { foreignKey: 'id_medico' });
@@ -38,9 +36,20 @@ Agenda.belongsTo(Medico, { foreignKey: 'id_medico' });
 Sucursal.hasMany(Agenda, { foreignKey: 'id_sucursal' });
 Agenda.belongsTo(Sucursal, { foreignKey: 'id_sucursal' });
 
-// Muchos a muchos Medico <-> Especialidad vía MedicoEspecialidad
-Medico.belongsToMany(Especialidad, { through: MedicoEspecialidad, foreignKey: 'id_medico' });
-Especialidad.belongsToMany(Medico, { through: MedicoEspecialidad, foreignKey: 'id_especialidad' });
+// Relaciones muchos a muchos
+Medico.belongsToMany(Especialidad, {
+  through: MedicoEspecialidad,
+  foreignKey: 'id_medico',
+  otherKey: 'id_especialidad',
+  as: 'especialidades'
+});
+
+Especialidad.belongsToMany(Medico, {
+  through: MedicoEspecialidad,
+  foreignKey: 'id_especialidad',
+  otherKey: 'id_medico',
+  as: 'medicos'
+});
 
 module.exports = {
   sequelize,
@@ -52,5 +61,5 @@ module.exports = {
   Turno,
   Especialidad,
   MedicoEspecialidad,
-  Usuario // ✅ ahora es el modelo correctamente instanciado
+  Usuario
 };

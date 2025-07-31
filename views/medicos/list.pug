@@ -20,7 +20,7 @@ block content
           th Apellido
           th DNI
           th Email
-          th Especialidad
+          th Especialidad y Matrícula
           th Estado
           th Acciones
       tbody
@@ -31,14 +31,16 @@ block content
             td= medico.dni
             td= medico.email
             td
-              if medico.Especialidads && medico.Especialidads.length
+              if medico.especialidades && medico.especialidades.length
                 ul.mb-0.text-start
-                  each esp in medico.Especialidads
-                    li= esp.nombre
+                  each esp in medico.especialidades
+                    li
+                      - const matricula = esp.MedicoEspecialidad ? esp.MedicoEspecialidad.matricula : 'N/A';
+                      | #{esp.nombre} - Matrícula: #{matricula}
               else
                 | Sin asignar
             td
-              if medico.estado === 'Activo'
+              if medico.estado === true || medico.estado === 'Activo'
                 span.badge.bg-success Activo
               else
                 span.badge.bg-secondary Inactivo

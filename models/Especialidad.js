@@ -12,9 +12,8 @@ const Especialidad = sequelize.define('Especialidad', {
     allowNull: false
   }
 }, {
-  tableName: 'especialidades', // ✅ Esto es lo que faltaba
+  tableName: 'especialidades',
   timestamps: false
 });
 
 module.exports = Especialidad;
-

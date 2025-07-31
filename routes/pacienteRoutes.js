@@ -9,7 +9,7 @@ router.use(verificarAdmin);
 // Ahora definís las rutas sin middleware individual porque ya está aplicado arriba
 router.get('/', pacienteController.getAll);
 router.get('/agregar', pacienteController.renderAgregarPaciente);
-router.get('/buscar', pacienteController.buscarPorDni);
+router.get('/buscar', verificarAdmin, pacienteController.buscarPorDni);
 router.get('/editar/:id', pacienteController.renderEditarPaciente);
 router.get('/:id', pacienteController.getById);
 router.post('/', pacienteController.create);

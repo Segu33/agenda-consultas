@@ -1,0 +1,98 @@
+extends ../layout
+
+block content
+  .container.mt-4
+    h2.text-center.mb-4 Gestión de Agendas Cerradas
+
+    //- Formulario para crear o editar bloqueo de agenda
+    form#formAgendaCerrada(method="POST", action="/agendas-cerradas") 
+      input(type="hidden", name="id", id="agendaCerradaId")
+
+      .mb-3
+        label.form-label(for="id_agenda") Seleccione Agenda
+        select.form-select(name="id_agenda", id="id_agenda", required)
+          option(value="") -- Seleccione una agenda --
+          each agenda in agendas
+            option(value=agenda.id_agenda)= agenda.nombre + ' - Dr. ' + ((agenda.Medico && agenda.Medico.apellido) || '')
+
+      .mb-3
+        label.form-label(for="fecha_inicio") Fecha Inicio
+        input.form-control(type="date", name="fecha_inicio", id="fecha_inicio", required)
+
+      .mb-3
+        label.form-label(for="fecha_fin") Fecha Fin
+        input.form-control(type="date", name="fecha_fin", id="fecha_fin", required)
+
+      .mb-3
+        label.form-label(for="motivo") Motivo
+        input.form-control(type="text", name="motivo", id="motivo", placeholder="Motivo del bloqueo", required)
+
+      button.btn.btn-primary(type="submit") Guardar
+
+    hr
+
+    //- Listado de agendas cerradas
+    if agendasCerradas.length === 0
+      p.text-center.mt-4 No hay agendas cerradas registradas.
+    else
+      table.table.table-striped.mt-4
+        thead
+          tr
+            th ID
+            th Agenda
+            th Médico
+            th Fecha Inicio
+            th Fecha Fin
+            th Motivo
+            th Acciones
+        tbody
+          each agCerrada in agendasCerradas
+            tr
+              td #{agCerrada.id}
+              td #{agCerrada.Agenda && agCerrada.Agenda.nombre || 'N/D'}
+              td #{agCerrada.Agenda && agCerrada.Agenda.Medico ? agCerrada.Agenda.Medico.apellido + ', ' + agCerrada.Agenda.Medico.nombre : 'N/D'}
+              td #{(typeof agCerrada.fecha_inicio === 'string' ? agCerrada.fecha_inicio.slice(0,10) : agCerrada.fecha_inicio.toISOString().slice(0,10))}
+              td #{(typeof agCerrada.fecha_fin === 'string' ? agCerrada.fecha_fin.slice(0,10) : agCerrada.fecha_fin.toISOString().slice(0,10))}
+              td #{agCerrada.motivo}
+              td
+                button.btn.btn-sm.btn-warning(onclick='editarAgendaCerrada("' + agCerrada.id + '")') Editar
+                button.btn.btn-sm.btn-danger.ms-2(onclick='eliminarAgendaCerrada("' + agCerrada.id + '")') Eliminar
+
+  script.
+    // Datos para JS
+    const agendasCerradas = !{JSON.stringify(agendasCerradas || [])};
+
+    // Cargar datos al formulario para editar
+    function editarAgendaCerrada(id) {
+      console.log('Editar agenda cerrada con id:', id);
+      const ag = agendasCerradas.find(a => a.id == id);
+      if (!ag) return alert('Agenda cerrada no encontrada');
+
+      document.getElementById('agendaCerradaId').value = ag.id;
+      document.getElementById('id_agenda').value = ag.id_agenda;
+      document.getElementById('fecha_inicio').value = ag.fecha_inicio.slice(0,10);
+      document.getElementById('fecha_fin').value = ag.fecha_fin.slice(0,10);
+      document.getElementById('motivo').value = ag.motivo;
+
+      const form = document.getElementById('formAgendaCerrada');
+      form.action = `/agendas-cerradas/${id}?_method=PUT`;
+    }
+
+    // Confirmar y eliminar
+    function eliminarAgendaCerrada(id) {
+      console.log('Eliminar agenda cerrada con id:', id);
+      if (!id) {
+        alert('ID inválido');
+        return;
+      }
+      if (confirm('¿Está seguro que desea eliminar esta agenda cerrada?')) {
+        fetch(`/agendas-cerradas/${id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(res => {
+          if (res.ok) location.reload();
+          else alert('Error al eliminar.');
+        });
+      }
+    }
+

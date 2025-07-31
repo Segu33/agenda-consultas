@@ -1,0 +1,23 @@
+extends ../layout
+
+block content
+  h1.text-center.text-danger.mb-4 Eliminar Turno
+
+  if turno
+    p ¿Estás seguro que deseas eliminar el turno del paciente 
+      strong #{turno.Paciente.nombre} #{turno.Paciente.apellido}
+      |  con el Dr. 
+      strong #{turno.Medico.nombre} #{turno.Medico.apellido}
+      |  el día 
+      strong #{turno.fecha} 
+      |  a las 
+      strong #{turno.hora}?
+    
+    form(action=`/turnos/${turno.id_turno}?_method=DELETE`, method="POST")
+      button.btn.btn-danger(type="submit") Confirmar Eliminación
+      a.btn.btn-secondary.ms-2(href="/turnos") Cancelar
+  else
+    .alert.alert-success.text-center
+      h3 Turno eliminado con éxito
+      p La operación se completó con éxito.
+      a.btn.btn-primary.mt-3(href="/turnos") Volver a la lista de turnos

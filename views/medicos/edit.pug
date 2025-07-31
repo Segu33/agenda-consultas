@@ -3,31 +3,109 @@ extends ../layout
 block content
   h1.text-center.mb-4 Editar Médico
 
+  // Línea de depuración para confirmar que el ID del médico está llegando
+  p.text-danger ID del médico: #{medico.id_medico}
+
   form(action=`/medicos/update/${medico.id_medico}`, method="post")
-    label Nombre:
-    input(type="text", name="nombre", required, value=medico.nombre)
+    .mb-3
+      label(for="nombre") Nombre:
+      input.form-control(type="text", name="nombre", required, value=medico.nombre)
 
-    label Apellido:
-    input(type="text", name="apellido", required, value=medico.apellido)
+    .mb-3
+      label(for="apellido") Apellido:
+      input.form-control(type="text", name="apellido", required, value=medico.apellido)
 
-    label DNI:
-    input(type="text", name="dni", required, value=medico.dni)
+    .mb-3
+      label(for="dni") DNI:
+      input.form-control(type="text", name="dni", required, value=medico.dni)
 
-    label Email:
-    input(type="text", name="email", required, value=medico.email)
+    .mb-3
+      label(for="email") Email:
+      input.form-control(type="email", name="email", required, value=medico.email)
 
-    label Teléfono:
-    input(type="text", name="telefono", value=medico.telefono)
+    .mb-3
+      label(for="telefono") Teléfono:
+      input.form-control(type="text", name="telefono", value=medico.telefono)
 
-    label(for="estado") Estado:
-      select(name="estado" id="estado" required)
+    .mb-3
+      label(for="estado") Estado:
+      select.form-select(name="estado", id="estado", required)
         option(value="1", selected=medico.estado === true) Activo
         option(value="0", selected=medico.estado === false) Inactivo
 
-    label Especialidad:
-      select(name="id_especialidad", required)
-        option(value='') -- Seleccionar Especialidad --
-        each especialidad in especialidades
-          option(value=especialidad.id_especialidad selected=(medico.Especialidad && especialidad.id_especialidad === medico.Especialidad.id_especialidad))= especialidad.nombre
+    hr
 
-    button(type="submit") Guardar Cambios
+    h5 Especialidades y Matrículas
+
+    #especialidades-container
+      each esp in medico.especialidades
+        .mb-3.row
+          .col-md-8
+            select.form-select(
+              name="id_especialidad[]",
+              required
+            )
+              option(value='') -- Seleccionar Especialidad --
+              each especialidad in especialidades
+                option(
+                  value=especialidad.id_especialidad,
+                  selected=(esp.id_especialidad === especialidad.id_especialidad)
+                )= especialidad.nombre
+          .col-md-4
+            input.form-control(
+              type="text",
+              name="matricula[]",
+              placeholder="Matrícula",
+              required,
+              value= esp.MedicoEspecialidad ? esp.MedicoEspecialidad.matricula : ''
+            )
+
+    button.btn.btn-outline-primary.mt-2(type="button", onclick="agregarEspecialidad()") ➕ Agregar otra especialidad
+
+    hr
+
+    button.btn.btn-primary(type="submit") Guardar Cambios
+
+  script.
+    function agregarEspecialidad() {
+      const container = document.getElementById('especialidades-container');
+      const div = document.createElement('div');
+      div.classList.add('mb-3', 'row');
+
+      const colSelect = document.createElement('div');
+      colSelect.classList.add('col-md-8');
+      const select = document.createElement('select');
+      select.classList.add('form-select');
+      select.setAttribute('name', 'id_especialidad[]');
+      select.required = true;
+
+      const optionDefault = document.createElement('option');
+      optionDefault.value = '';
+      optionDefault.textContent = '-- Seleccionar Especialidad --';
+      select.appendChild(optionDefault);
+
+      const especialidades = !{JSON.stringify(especialidades)};
+      especialidades.forEach(esp => {
+        const option = document.createElement('option');
+        option.value = esp.id_especialidad;
+        option.textContent = esp.nombre;
+        select.appendChild(option);
+      });
+
+      colSelect.appendChild(select);
+
+      const colInput = document.createElement('div');
+      colInput.classList.add('col-md-4');
+      const input = document.createElement('input');
+      input.classList.add('form-control');
+      input.setAttribute('type', 'text');
+      input.setAttribute('name', 'matricula[]');
+      input.setAttribute('placeholder', 'Matrícula');
+      input.required = true;
+      colInput.appendChild(input);
+
+      div.appendChild(colSelect);
+      div.appendChild(colInput);
+
+      container.appendChild(div);
+    }

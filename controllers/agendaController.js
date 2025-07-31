@@ -114,10 +114,35 @@ async function getAvailableTimes(req, res) {
 }
 
 // Mostrar calendario de agendas con FullCalendar
+// Mostrar calendario de agendas con FullCalendar
+// Mostrar calendario de agendas con FullCalendar
 async function mostrarCalendarioAgendas(req, res) {
   try {
+    const { medico, especialidad } = req.query;
+
+    // Cargar médicos y especialidades para el formulario
+    const [medicos, especialidades] = await Promise.all([
+      Medico.findAll(),
+      Especialidad.findAll()
+    ]);
+
+    // Filtros para la búsqueda de agendas
+    const whereClause = {};
+    if (medico) whereClause.id_medico = medico;
+    if (especialidad) whereClause.id_especialidad = especialidad;
+
     const agendas = await Agenda.findAll({
-      include: [Medico, Sucursal]
+      where: whereClause,
+      include: [
+        {
+          model: Medico,
+          include: [{
+            model: Especialidad,
+            as: 'especialidades'
+          }]
+        },
+        Sucursal
+      ]
     });
 
     const diasMap = {
@@ -144,26 +169,44 @@ async function mostrarCalendarioAgendas(req, res) {
         const horaInicio = moment(agenda.hora_inicio, 'HH:mm:ss').format('HH:mm:ss');
         const horaFin = moment(agenda.hora_fin, 'HH:mm:ss').format('HH:mm:ss');
 
+        const medicoObj = agenda.Medico;
+        const especialidadNombre = medicoObj?.especialidades?.[0]?.nombre || 'Sin especialidad';
+        const sucursalNombre = agenda.Sucursal?.nombre || 'Sucursal no definida';
+
         eventos.push({
           daysOfWeek: [dow],
           startTime: horaInicio,
           endTime: horaFin,
-          title: `${agenda.Medico?.nombre} - ${agenda.Sucursal?.nombre}`,
+          title: `${medicoObj?.nombre} ${medicoObj?.apellido} (${especialidadNombre}) - ${sucursalNombre}`,
           display: 'background',
           color: '#00c0ff33'
         });
       });
     });
 
+    const hoy = moment().format('YYYY-MM-DD');
+
     res.render('agendas/calendario-agendas', {
       title: 'Calendario de Agendas',
-      eventos
+      eventos,
+      medicos,
+      especialidades,
+      medicoSeleccionado: parseInt(medico) || '',
+      especialidadSeleccionada: parseInt(especialidad) || '',
+      fechaActual: hoy
     });
+
   } catch (error) {
     console.error('Error al mostrar el calendario:', error);
     res.status(500).send('Error al cargar el calendario');
   }
 }
+
+module.exports = {
+  mostrarCalendarioAgendas
+};
+
+
 
 module.exports = {
   createAgenda,

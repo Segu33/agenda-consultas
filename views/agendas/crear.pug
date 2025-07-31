@@ -13,16 +13,15 @@ block content
     form(method="POST", action="/agendas/crear")
       .form-group.mb-3
         label(for="id_medico") Médico:
-        select.form-control(name="id_medico", required)
+        select.form-control#id_medico(name="id_medico", required)
           option(value="") -- Seleccione un médico --
           each medico in medicos
             option(value=medico.id_medico)= medico.nombre
+
       .form-group.mb-3
         label(for="id_especialidad") Especialidad:
-        select.form-control(name="id_especialidad", required)
+        select.form-control#id_especialidad(name="id_especialidad", required disabled)
           option(value="") -- Seleccione una especialidad --
-          each especialidad in especialidades
-            option(value=especialidad.id_especialidad)= especialidad.nombre
 
       .form-group.mb-3
         label(for="id_sucursal") Sucursal:
@@ -59,3 +58,47 @@ block content
         input.form-control(type="date", name="fecha_fin", required)
 
       button.btn.btn-primary(type="submit") Crear Agenda
+
+  script.
+    document.addEventListener('DOMContentLoaded', () => {
+      const medicoSelect = document.getElementById('id_medico');
+      const especialidadSelect = document.getElementById('id_especialidad');
+
+      medicoSelect.addEventListener('change', async () => {
+        const medicoId = medicoSelect.value;
+
+        especialidadSelect.innerHTML = '';
+        especialidadSelect.disabled = true;
+
+        if (!medicoId) {
+          especialidadSelect.innerHTML = '<option value="">-- Seleccione una especialidad --</option>';
+          return;
+        }
+
+        try {
+          const res = await fetch(`/medicos/${medicoId}/especialidades`);
+          const especialidades = await res.json();
+
+          if (especialidades.length === 1) {
+            const unica = especialidades[0];
+            const option = new Option(unica.nombre, unica.id_especialidad);
+            especialidadSelect.add(option);
+            especialidadSelect.disabled = true;
+          } else if (especialidades.length > 1) {
+            especialidadSelect.add(new Option('-- Seleccione una especialidad --', ''));
+            especialidades.forEach(esp => {
+              const option = new Option(esp.nombre, esp.id_especialidad);
+              especialidadSelect.add(option);
+            });
+            especialidadSelect.disabled = false;
+          } else {
+            especialidadSelect.add(new Option('-- Sin especialidades asignadas --', ''));
+            especialidadSelect.disabled = true;
+          }
+        } catch (err) {
+          console.error('Error al obtener especialidades del médico:', err);
+          especialidadSelect.innerHTML = '<option value="">-- Error al cargar --</option>';
+          especialidadSelect.disabled = true;
+        }
+      });
+    });

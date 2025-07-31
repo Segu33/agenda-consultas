@@ -288,12 +288,14 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const deleted = await Turno.destroy({ where: { id_turno: req.params.id } });
-    deleted ? res.json({ success: 'Turno eliminado' }) : res.status(404).json({ error: 'Turno no encontrado' });
+    await Turno.destroy({ where: { id_turno: req.params.id } });
+    res.render('turnos/eliminar', { turno: null });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar el turno' });
+    console.error('Error al eliminar turno:', error);
+    res.status(500).send('Error al eliminar turno');
   }
 };
+
 
 exports.getAvailable = async (req, res) => {
   const { medico_id, fecha } = req.query;
@@ -399,4 +401,18 @@ exports.generarTurnosDesdeWeb = async (req, res) => {
 
 exports.crearSobreturno = async (req, res) => {
   res.send('crearSobreturno aún no implementado.');
+};
+exports.mostrarEliminarTurno = async (req, res) => {
+  try {
+    const turno = await Turno.findByPk(req.params.id, {
+      include: [Medico, Paciente]
+    });
+
+    if (!turno) return res.render('turnos/eliminar', { turno: null });
+
+    res.render('turnos/eliminar', { turno });
+  } catch (error) {
+    console.error('Error al cargar vista de eliminación:', error);
+    res.status(500).send('Error interno');
+  }
 };
